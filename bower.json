@@ -1,0 +1,17 @@
+{
+  "name": "AppName",
+  "version": "0.0.1",
+  "main": "gulp.js",
+  "authors": [
+    "die.interaktiven GmbH & Co. KG",
+    "Konstantin Büschel <konstantin@die-interaktiven.de>"
+  ],
+  "description": "Titanium Mobile App Template",
+  "homepage": "http://www.die-interaktiven.de",
+  "private": true,
+  "dependencies": {
+    "momentjs": "~2.8.2",
+    "q": "~2.0.2",
+    "lodash": "~2.4.1"
+  }
+}

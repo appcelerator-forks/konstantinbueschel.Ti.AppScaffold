@@ -1,0 +1,25 @@
+@import "settings";
+@import "compass";
+@import "plugins/normalize";
+@import "global";
+@import "utils";
+/* Reusabele Componenets */
+/* Global Sections */
+@import "sections/content";
+
+* {
+	color: $default-text-color;
+}
+
+
+html, body {
+	background: transparent;
+}
+
+body {
+	font-family: $font-corporate;
+	font-size: 100%;
+	margin: 0;
+	padding: 0;
+	color: $default-text-color;
+}

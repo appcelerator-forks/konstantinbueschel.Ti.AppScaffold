@@ -1,0 +1,105 @@
+/**
+ * Pseudo-Formatierungen
+ */
+::selection {
+  background: $primary-color;
+  color: #fff;
+}
+
+::-moz-selection {
+  background: $primary-color;
+  color: #fff;
+}
+
+/* Überschriften */
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  margin: 0 0 1em 0;
+  padding: 0;
+  font-size: 1em;
+  font-weight: bold;
+  text-align: left;
+}
+
+
+p {
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  color: $primary-color;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+*:focus {
+  outline: none;
+}
+
+ul {
+  list-style: square;
+  list-style-position: inside;
+  padding: 0;
+  margin: 1em 0;
+  text-align: left;
+}
+
+ul ul {
+  list-style: disc;
+  margin-top: 0;
+}
+
+ul ul ul {
+  list-style: circle;
+  margin-top: 0;
+}
+
+ol li {
+  margin: 1em 0 0 0;
+  padding: 0;
+}
+
+hr {
+  display: block;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+strong {
+  font-weight: bold;
+}
+
+img {
+  display: block;
+  border: 0;
+}
+
+form {
+  margin: 0;
+  padding: 0;
+}
+
+fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+legend {
+  display: none;
+}
+
+input, select, textarea {
+  background: #fff;
+  @include box-sizing(border-box);
+}

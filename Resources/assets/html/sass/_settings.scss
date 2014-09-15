@@ -1,0 +1,28 @@
+$font-default: Helvetica, Arial, sans-serif;
+$font-corporate: $font-default;
+
+$default-text-color: #000000;
+$default-border-color: #c5c4c1;
+
+$primary-color: #4ead54;
+$primary-color-dark: #4ead54;
+
+$secondary-color: #f6f5f2;
+
+$warning-color: #f1c40f;
+$warning-text-color: darken($warning-color, 30%);
+
+$error-color: transparentize($primary-color-dark, 0.8);
+$error-text-color: $primary-color;
+
+/* BREAKPOINT SETTINGS */
+//@see https://github.com/Team-Sass/breakpoint/wiki/Respond-To
+/*
+$default-max-width: 1000px;
+$popup-max-width: 600px;
+
+$breakpoint-no-query-fallbacks: falls;
+$breakpoint-to-ems: true;
+
+$breakpoints: 'big' (801px), 'big-medium' (481px), 'medium' (481px 800px), 'medium-small' (0px 800px), 'small' (0px 480px);
+*/
