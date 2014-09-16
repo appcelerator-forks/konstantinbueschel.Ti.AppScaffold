@@ -1,5 +1,5 @@
 {
-  "name": "AppName",
+  "name": "app-name",
   "version": "0.0.1",
   "main": "gulp.js",
   "authors": [
@@ -7,11 +7,40 @@
     "Konstantin Büschel <konstantin@die-interaktiven.de>"
   ],
   "description": "Titanium Mobile App Template",
-  "homepage": "http://www.die-interaktiven.de",
+  "homepage": "https://bitbucket.org/konstantin_interaktiv/ti-app-scaffold",
   "private": true,
   "dependencies": {
     "momentjs": "~2.8.2",
     "q": "~2.0.2",
-    "lodash": "~2.4.1"
+    "lodash": "~2.4.1",
+    "async": "~0.9.0"
+  },
+  "preen": {
+    "momentjs": [
+      "min/moment-with-locales.js"
+    ],
+    "q": [
+      "q.js"
+    ],
+    "lodash": [
+      "dist/lodash.min.js"
+    ],
+    "async": [
+      "lib/async.js"
+    ]
+  },
+  "overrides": {
+    "momentjs": {
+      "main": "min/moment-with-locales.js"
+    },
+    "q": {
+      "main": "q.js"
+    },
+    "lodash": {
+      "main": "dist/lodash.min.js"
+    },
+    "async": {
+      "main": "lib/async.js"
+    }
   }
 }

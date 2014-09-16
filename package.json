@@ -1,22 +1,35 @@
 {
-  "name": "AppName",
+  "name": "app-name",
   "version": "0.0.1",
   "description": "Titanium Mobile App Template",
   "main": "gulp.js",
+  "author": "die.interaktiven GmbH & Co. KG, Konstantin Büschel <konstantin@die-interaktiven.de>",
+  "repository": "https://bitbucket.org/konstantin_interaktiv/ti-app-scaffold",
+  "devDependencies": {
+    "bower": "*",
+    "del": "*",
+    "dev.tiapp": "*",
+    "gittio": "*",
+    "gulp": "^3.8.8",
+    "gulp-bower": "*",
+    "gulp-changed": "*",
+    "gulp-filter": "^1.0.2",
+    "gulp-load-plugins": "*",
+    "gulp-print": "^1.1.0",
+    "gulp-rename": "^1.2.0",
+    "gulp-sass": "*",
+    "iconfont": "*",
+    "main-bower-files": "^2.0.0",
+    "preen": "*",
+    "run-sequence": "^0.3.6",
+    "ti-installr-hook": "*",
+    "ti-stealth": "*",
+    "tiapp.xml": "*",
+    "ticons": "*",
+    "titanium": "*",
+    "yargs": "*"
+  },
   "scripts": {
     "test": "Hello App World!"
-  },
-  "author": "die.interaktiven GmbH & Co. KG, Konstantin Büschel <konstantin@die-interaktiven.de>",
-  "dependencies": {
-    // "titanium": "^3.3.0"
-    // "bower": "^1.3.9",
-    // "gittio": "^0.4.4",
-    // "ti-installr-hook": "^0.3.0",
-    // "ticons": "*",
-    "gulp": "*",
-    "dev.tiapp": "0.0.2",
-    "ti-stealth": "0.0.1",
-    "tiapp.xml": "^0.2.0",
-    "iconfont": "*"
   }
 }
