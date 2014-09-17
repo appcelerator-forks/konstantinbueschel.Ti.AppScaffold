@@ -28,8 +28,5 @@
     "ticons": "*",
     "titanium": "*",
     "yargs": "*"
-  },
-  "scripts": {
-    "test": "Hello App World!"
   }
 }

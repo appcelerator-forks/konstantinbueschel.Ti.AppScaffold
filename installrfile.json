@@ -1,0 +1,9 @@
+{
+    "notify":               false,
+    "apiToken":             "",
+    "releaseNotes":         "",
+    "appFileDir":           "./dist/",
+    "appFile":              "xx.ipa",
+    "provisioningUUID":     "",
+    "distCertificateName":  "die.interaktiven GmbH & Co. KG (42HNMCMK48)"
+}
