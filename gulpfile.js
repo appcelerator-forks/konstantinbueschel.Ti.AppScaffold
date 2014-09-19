@@ -15,6 +15,7 @@ var gulp           = require('gulp'),
 /**********************************************************************************
  * CONFIGURATION
  * ********************************************************************************/
+
 var CONFIG = {
 
 	DIRECTORIES: {
@@ -37,6 +38,7 @@ var isDevelopmentEnv = CONFIG.ENVIRONMENT === 'development',
 /**********************************************************************************
  * SCSS
  * ********************************************************************************/
+
 gulp.task('scss', function () {
 
 	gulp.src([CONFIG.DIRECTORIES.SOURCE + '/scss/**/*.scss'])
@@ -60,17 +62,20 @@ gulp.task('scss', function () {
 /**********************************************************************************
  * CLEAN
  * ********************************************************************************/
+
 gulp.task('clean', function (callback) {
 
 	// delete Bower dir
 	del([CONFIG.DIRECTORIES.BOWER + '*'], callback);
 });
 
+
 gulp.task('preen', ['bower'], function (callback) {
 
 	// return preen.preen({}, callback);
 	preen.preen({}, callback);
 });
+
 
 gulp.task('ti:clean', function(callback) {
 
@@ -114,12 +119,36 @@ gulp.task('ti:build', function(callback) {
 	var cliCommand = "ti build",
 
 	    cliArgs = [
-		    ("-p " + CONFIG.OS),
-		    (args.tall ? "--tall" : ""),
-		    (args.retina ? "--retina" : "")
+		    ("-p " + CONFIG.OS)
 	    ];
 
 	cliArgs.unshift(cliCommand);
+
+
+	if (!args.noRetina) {
+
+		cliArgs.push('--tall');
+		cliArgs.push('--retina');
+	}
+
+	if (CONFIG.OS === 'ios' && !args.I) {
+
+		cliArgs.push('-I 7.1');
+	}
+
+	delete args.noRetina;
+	delete args.os;
+	delete args.env;
+	delete args.environment;
+	delete args.gulp;
+
+
+	var argsProp;
+
+	for (argsProp in args) {
+
+		cliArgs.push(args[argsProp]);
+	}
 
 
 	// LOG
@@ -146,6 +175,11 @@ gulp.task('ti:build', function(callback) {
 	});
 });
 
+
+/**********************************************************************************
+ * INSTALLR
+ * ********************************************************************************/
+
 gulp.task('installr:build', function (callback) {
 
 	var cliCommand = "titanium build",
@@ -206,9 +240,6 @@ gulp.task('installr:build', function (callback) {
 });
 
 
-/**********************************************************************************
- * INSTALLR
- * ********************************************************************************/
 gulp.task('installr:upload', function (callback) {
 
 	installrConfig.releaseNotes = (installrConfig.releaseNotes && installrConfig.releaseNotes.length ? installrConfig.releaseNotes : CONFIG.APP_VERSION);
@@ -255,6 +286,7 @@ gulp.task('installr:upload', function (callback) {
 	});
 });
 
+
 gulp.task('installr', function (callback) {
 
 	runSequence('installr:build', 'installr:upload', callback);
@@ -262,176 +294,62 @@ gulp.task('installr', function (callback) {
 
 
 /**********************************************************************************
- * TITANIUM MOBILE
+ * INIT
  * ********************************************************************************/
-gulp.task('installr:build', function (callback) {
 
-	var cliCommand = "titanium build",
+gulp.task('bower', function () {
 
-	    cliArgs = [
-		    ("-O '" + installrConfig.appFileDir + "'"), // output dir
-		    ("-p '" + CONFIG.OS + "'"), // target platform
-		    "-d './'", // project dir
-		    "-b", // build-only flag
-		    "-f", // force full rebuild flag
-		    "--no-prompt" // disable interactive prompting
-	    ];
+	return $.bower();
+});
 
 
-	switch (CONFIG.OS) {
+gulp.task('init', ['bower', 'preen'], function () {
 
-		case 'ios':
-
-			cliArgs.push("-P '" + installrConfig.provisioningUUID + "'"); // provisioning profile uuid
-			cliArgs.push("-R '" + installrConfig.distCertificateName + "'"); // distribution certificate name
-			cliArgs.push("-T dist-adhoc"); // target ios
-
-			break;
-
-		case 'android':
-
-			cliArgs.push("-T dist-playstore"); // target android
-
-			break;
-	}
+	var momentFilter = $.filter('moment-with-locales.js'),
+	    lodashFilter = $.filter('q.js'),
+	    queueFilter = $.filter('lodash.min.js'),
+	    asyncFilter = $.filter('async.js');
 
 
-	// LOG
-	console.log('CLI command: ', cliCommand, cliArgs.join(' '));
+	return gulp.src(bowerFiles({
+		env: CONFIG.ENVIRONMENT
+	}))
 
+		.pipe(momentFilter)
+		.pipe($.rename('moment.js'))
+		.pipe(gulp.dest('Resources/helpers/date'))
+		.pipe(momentFilter.restore())
 
-	cliArgs.unshift(cliCommand);
+		.pipe(lodashFilter)
+		.pipe($.rename('lodash.js'))
+		.pipe(gulp.dest('Resources/helpers/common'))
+		.pipe(lodashFilter.restore())
 
+		.pipe(queueFilter)
+		.pipe($.rename('q.js'))
+		.pipe(gulp.dest('Resources/helpers/xhr'))
+		.pipe(queueFilter.restore())
 
-	var ti = exec(cliArgs.join(' '), {
-
-		maxBuffer: (5000 * 1024)
-	});
-
-	ti.stdout.on('data', function (data) {
-		console.log(data);
-	});
-
-	ti.stderr.on('data', function (data) {
-		console.log(data);
-	});
-
-	ti.on('close', function (code) {
-
-		console.log('Finished with code: ', code);
-		callback(code != 0);
-	});
+		.pipe(asyncFilter)
+		.pipe(gulp.dest('Resources/helpers/xhr'))
+		.pipe(asyncFilter.restore());
 });
 
 
 /**********************************************************************************
- * INSTALLR
+ * DEFAULT
  * ********************************************************************************/
-gulp.task('installr:upload', function (callback) {
 
-	installrConfig.releaseNotes = (installrConfig.releaseNotes && installrConfig.releaseNotes.length ? installrConfig.releaseNotes : CONFIG.APP_VERSION);
+gulp.task('default', function (callback) {
 
-	var cliCommand = "curl",
-
-	    cliArgs = [
-		    ("-H 'X-InstallrAppToken: " + installrConfig.apiToken + "' https://www.installrapp.com/apps.json "),
-		    ("-F 'qqfile=@" + installrConfig.appFileDir + installrConfig.appFile + "' "),
-		    ("-F 'releaseNotes=" + installrConfig.releaseNotes + "' "),
-		    ("-F 'notify=" + installrConfig.notify + "'")
-	    ];
-
-
-	// LOG
-	console.log('CLI Command: ', cliCommand, cliArgs.join(' '));
-
-
-	cliArgs.unshift(cliCommand)
-
-	var curl = exec(cliArgs.join(' '), {
-
-		maxBuffer: (5000 * 1024)
-	});
-
-	curl.stdout.on('data', function (data) {
-
-		// LOG
-		console.log(data);
-	});
-
-	curl.stderr.on('data', function (data) {
-
-		// LOG
-		console.log(data);
-	});
-
-	curl.on('close', function (code) {
-
-		// LOG
-		console.log('Finished with code: ', code);
-
-		callback(code != 0);
-	});
+	runSequence('init', 'clean', callback);
 });
 
-gulp.task('installr', function (callback) {
 
-	runSequence('installr:build', 'installr:upload', callback);
+/**********************************************************************************
+ * ERROR HANDLER
+ * ********************************************************************************/
 
-
-	/**********************************************************************************
-	 * INIT
-	 * ********************************************************************************/
-	gulp.task('bower', function () {
-
-		return $.bower();
-	});
-
-	gulp.task('init', ['bower', 'preen'], function () {
-
-		var momentFilter = $.filter('moment-with-locales.js'),
-		    lodashFilter = $.filter('q.js'),
-		    queueFilter = $.filter('lodash.min.js'),
-		    asyncFilter = $.filter('async.js');
-
-
-		return gulp.src(bowerFiles({
-			env: CONFIG.ENVIRONMENT
-		}))
-
-			.pipe(momentFilter)
-			.pipe($.rename('moment.js'))
-			.pipe(gulp.dest('Resources/helpers/date'))
-			.pipe(momentFilter.restore())
-
-			.pipe(lodashFilter)
-			.pipe($.rename('lodash.js'))
-			.pipe(gulp.dest('Resources/helpers/common'))
-			.pipe(lodashFilter.restore())
-
-			.pipe(queueFilter)
-			.pipe($.rename('q.js'))
-			.pipe(gulp.dest('Resources/helpers/xhr'))
-			.pipe(queueFilter.restore())
-
-			.pipe(asyncFilter)
-			.pipe(gulp.dest('Resources/helpers/xhr'))
-			.pipe(asyncFilter.restore());
-	});
-
-
-	/**********************************************************************************
-	 * DEFAULT
-	 * ********************************************************************************/
-	gulp.task('default', function (callback) {
-
-		runSequence('init', 'clean', callback);
-	});
-
-
-	/**********************************************************************************
-	 * ERROR HANDLER
-	 * ********************************************************************************/
-
-	function errorHandler(err) {
-		console.log(err);
-	}
+function errorHandler(err) {
+	console.log(err);
+}
