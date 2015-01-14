@@ -1,3 +1,21 @@
+/*
+ * TiCsonv.js
+ *
+ * /Resources/helpers/text/TiCsonv.js
+ *
+ * This module is a helper for CSV file operations
+ *
+ * Author:  kbueschel
+ * Date:    2015-01-09
+ *
+ * Maintenance Log
+ *
+ * Author:
+ * Date:
+ * Changes:
+ *
+ */
+
 if (typeof(Csonv) == "undefined") {
 
 // *
@@ -27,65 +45,65 @@ Csonv = (function(undefined) {
       }
       return array;
     };
-    
+
     // Date Library Laden
     if (!moment) {
-        var moment = require('/helpers/date/moment');    
+        var moment = require('/helpers/date/moment');
     }
-    
+
     moment.lang(Ti.Locale.currentLanguage);
-    
+
     parsers = {
-      
+
       "string": function(value) {
         return value.toString();
       },
-      
+
       "integer": function(value) {
         return parseInt(value, 10);
       },
-      
+
       "float": function(value) {
-        
+
         var parsedValue = parseFloat(value).toFixed(2);
-        
+
         if (isNaN(parsedValue)) {
-            parsedValue = '';    
-        } 
-        
+            parsedValue = '';
+        }
+
         return parsedValue;
       },
-      
+
       "boolean": function(value) {
         return parseInt(value, 10) == 1;
       },
-      
+
       "date": function(value) {
-      	
+
         if (moment && value && value.length) {
             return moment(value, 'DD.MM.YYYY').toJSON();
         }
         else {
-            return new Date(value);    
+            return new Date(value);
         }
       },
-      
+
       "strings": function(value) {
         return n("string", value);
       },
-      
+
       "integers": function(value) {
         return n("integer", value);
       },
-      
+
       "floats": function(value) {
         return n("float", value);
       },
-      
+
       "booleans": function(value) {
         return n("boolean", value);
       },
-      
+
       "dates": function(value) {
         return n("date", value);
       },
@@ -120,67 +138,67 @@ Csonv = (function(undefined) {
   };
 
   var resolvePath = function(url, relative) {
-    
+
     url = url.replace(/[^\/]+\/?$/, "") + relative;
     reg_exp = new RegExp(/[^\/]+\/\.\.\/?/);
-    
+
     while (url.match(reg_exp)) {
       url = url.replace(reg_exp, "");
     }
-    
+
     return url;
   };
 
-  
+
   /*
    * Added for Titanium to read from local files
    */
   var readFile = function(url) {
-  	
+
   	var f = Titanium.Filesystem.getFile(url);
-  	
+
  	if (f.exists()) {
- 		return String(f.read());	
+ 		return String(f.read());
  	}
  	else {
  		return {};
  	}
-	
+
   };
 
 
   var toObjects = function(data, url) {
-    
+
     cache[url] = {
       data: [],
       map : {}
     };
- 	
- 	
+
+
     var $ = cache[url],
     	lineBreakMatch = data.match(/(\r|\r\n|\n|\n\r)/gi),
     	lineBreak = '\n';
-    
+
     if (lineBreakMatch && lineBreakMatch.length) {
-    	
+
     	lineBreak = lineBreakMatch[0];
-    }    
-        
+    }
+
 	rows = data.split(lineBreak);
-	
-	
+
+
     // remove empty rows
     if (rows.length) {
-        
+
         var Tools = require('/helpers/common/tools');
-        
+
         rows = rows.filter(function(row, index, arrayObject) {
-        	
+
             return (Tools.type(row) == "string" && row.trim().length && row.trim().length > 4);
-        });    
+        });
     }
-    
-    
+
+
     var keys  = String(rows.shift()).csvSplit(),
         types = String(rows.shift()).csvSplit();
 
@@ -213,22 +231,22 @@ Csonv = (function(undefined) {
         }
       }
     }
-	
+
     return $.data;
   };
 
   return {
     version: "{version}",
-    
+
     separators: {
       column: ";",
       array : ","
     },
-    
+
     init : defineParsers,
-    
+
     fetch: function(url) {
-    	
+
     	// modified output to use readFile and read local file
     	// return cache[url] ? cache[url].data : toObjects(ajax(url), url);
     	// return cache[url] ? cache[url].data : toObjects(readFile(url), url);
@@ -251,9 +269,9 @@ String.prototype.toObjects = function() {
 };
 
 String.prototype.csvSplit = function(s) {
-  
+
   s = s || Csonv.separators.column;
-    
+
   var reg_exp = new RegExp(("(\\" + s + '|\\r?\\n|\\r|^)(?:"([^"]*(?:""[^"]*)*)"|([^"\\' + s + "\\r\\n]*))"), "gi");
   var str = this.trim(), row = [], m = null;
 
@@ -274,30 +292,30 @@ String.prototype.csvSplit = function(s) {
 };
 
 
-  
+
 Array.prototype.filter = function(fun /*, thisArg */) {
-    
+
     "use strict";
 
     if (this === void 0 || this === null) {
-        throw new TypeError();  
+        throw new TypeError();
     }
-      
+
 
     var t = Object(this);
     var len = t.length >>> 0;
-    
+
     if (typeof fun != "function") {
         throw new TypeError();
     }
 
     var res = [];
     var thisArg = arguments.length >= 2 ? arguments[1] : void 0;
-    
+
     for (var i = 0; i < len; i++) {
-      
+
       if (i in t) {
-        
+
         var val = t[i];
 
         // NOTE: Technically this should Object.defineProperty at

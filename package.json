@@ -1,10 +1,40 @@
 {
-  "name": "app-name",
-  "version": "0.0.1",
-  "description": "Titanium Mobile App Template",
-  "main": "gulp.js",
-  "author": "die.interaktiven GmbH & Co. KG, Konstantin Büschel <konstantin@die-interaktiven.de>",
-  "repository": "https://bitbucket.org/konstantin_interaktiv/ti-app-scaffold",
+  "name": "tiappscaffold",
+  "version": "1.0.0",
+  "description": "Titanium Mobile Classic App Template",
+  "keywords": [
+    "titanium",
+    "appcelerator",
+    "classic",
+    "scaffold",
+    "app"
+  ],
+  "author": {
+    "name": "Konstantin Bueschel",
+    "email": "konstantin@die-interaktiven.de"
+  },
+  "homepage": "https://bitbucket.org/konstantin_interaktiv/ti-app-scaffold",
+  "repository": {
+    "type": "hg",
+    "url": "https://bitbucket.org/konstantin_interaktiv/ti-app-scaffold"
+  },
+  "bugs": {
+    "url": "https://bitbucket.org/konstantin_interaktiv/ti-app-scaffold/issues",
+    "email": "konstantin.bueschel@gmail.com"
+  },
+  "main": "gulpfile.js",
+  "scripts": {
+    "init": "gulp"
+  },
+  "license": "Copyright Konstantin Büschel",
+  "engines": {
+    "node": ">=0.8"
+  },
+  "os": [
+    "osx"
+  ],
+  "preferGlobal": false,
+  "private": true,
   "devDependencies": {
     "bower": "*",
     "del": "*",
@@ -27,6 +57,6 @@
     "tiapp.xml": "*",
     "ticons": "*",
     "titanium": "*",
-    "yargs": "*"
+    "nconf": "^0.6.9"
   }
 }

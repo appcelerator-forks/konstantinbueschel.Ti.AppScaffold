@@ -1,60 +1,111 @@
 /*
  * menu.js
- * 
- * /Resources/lib/menu.js
- * 
+ *
+ * /Resources/helpers/app/menu.js
+ *
  * This module represents an ActionBar and menu helper
- * 
+ *
  * Author:		kbueschel
- * Date:		2014-09-08
- * 
+ * Date:        2015-01-09
+ *
  * Maintenance Log
- * 
+ *
  * Author:
  * Date:
  * Changes:
- * 
+ *
  * Copyright (c) 2014 by die.interaktiven GmbH & Co. KG. All Rights Reserved.
  * Proprietary and Confidential - This source code is not for redistribution
  */
 
 /**
  * Menu
- * 
+ *
  * @constructor
- * @param {Ti.UI.Window} _win
+ * @param {Ti.UI.Window/Ti.Android.Activity} _win/_activity
  * @param {Boolean} _winAlreadyOpen
  * @return {Menu} this
  */
-function Menu(_win, _winAlreadyOpen) {
-	
+function Menu() {
+
+	// fetch activity holder (window reference)
+	// or activity reference
+	var _parent = arguments[0];
+
+
 	// variable declaration
-	var win =				_win,
-	 
-		activity =			null, 
-		actionBar =			null,
-		 
-		events =			{}, 
-		menuItems =			[], 
-		menuItemObjects =	[],
-		 
-		$ =					this;
-	
-	
-	// add window event listener
-	win.addEventListener('open', onOpen);
-	
-	
-	// fire open event for window if it is already opened
-	if (win.isOpen === true || _winAlreadyOpen === true) {
-		
-		win.fireEvent('open');
+	var win = null,
+
+	    activity = null,
+	    actionBar = null,
+	    menu = null,
+
+	    events = {},
+	    menuItems = [],
+	    menuItemObjects = [],
+
+	    $ = this;
+
+
+	if (_parent) {
+
+		// DEBUG
+	Ti.API.debug('[AndroidMenu].constructor():_parent =', _parent.apiName, _parent.title, 'open?', _parent.isOpen, 'force open', arguments[1]);
+
+
+		switch (_parent.apiName) {
+
+			case 'Ti.UI.Window':
+
+				win = _parent;
+
+				// add window event listener
+				win.addEventListener('open', onOpen);
+
+
+				// fire open event for window if it is already opened
+				if (win.isOpen === true || arguments[1] === true) {
+
+					// DEBUG
+				Ti.API.debug('[AndroidMenu].constructor():Fire OPEN event on window');
+
+
+					win.fireEvent('open');
+				}
+
+				break;
+
+
+			case 'Ti.Android.Activity':
+
+				// DEBUG
+			Ti.API.debug('[AndroidMenu].constructor():Initializes activity');
+
+
+				activity = _parent;
+
+				_initializeActivity();
+
+				break;
+
+
+			default:
+
+				// DEBUG ERROR
+				Ti.API.error('[Menu].constructor():No window or activity object passed to constructor');
+
+				break;
+		}
+
+
+		// memory management
+		_parent = null;
 	}
-	
-	
+
+
 	/**
 	 * Triggers event with given event name
-	 * 
+	 *
 	 * @private
 	 * @method trigger
 	 * @param {String} name
@@ -81,16 +132,16 @@ function Menu(_win, _winAlreadyOpen) {
 				events[name][i]();
 			}
 		}
-		
+
 		return;
-		
+
 	} // END trigger()
 
-	
+
 	/**
-	 * Adds event listener for given event with 
+	 * Adds event listener for given event with
 	 * given callback. Multiple callbacks are supported.
-	 * 
+	 *
 	 * @private
 	 * @method on
 	 * @param {String} name
@@ -98,19 +149,19 @@ function Menu(_win, _winAlreadyOpen) {
 	 * @return void
 	 */
 	function on(name, callback) {
-		
+
 		events[name] || (events[name] = []);
 		events[name].push(callback);
-		
+
 		return;
-		
+
 	} // END on()
 
-	
+
 	/**
 	 * Removes event listener for given event
 	 * with given callback
-	 * 
+	 *
 	 * @private
 	 * @method off
 	 * @param {String} name
@@ -136,48 +187,69 @@ function Menu(_win, _winAlreadyOpen) {
 				delete events[name];
 			}
 		}
-		
+
 		return;
-		
+
 	} // off()
 
 
 	/**
 	 * Open window callback for given window reference from args.
-	 * 
+	 *
 	 * @private
 	 * @method onOpen
 	 * @param {Object} e
 	 * @return void
 	 */
 	function onOpen(e) {
-		
-		// set window open state		
+
+		// set window open state
 		win.isOpen = true;
-		
+
+
 		// remove listener because not needed any more
 		win.removeEventListener('open', onOpen);
 
 
 		// if no activity is given throw an error on console
 		if (!win.getActivity) {
-			
+
 			// ERROR
 			Ti.API.error('[MENU] Requires a heavyweight Window or TabGroup.');
-			
+
 			return;
 		}
 
-		
+
 		// fetch activity
 		activity = win.getActivity();
 
+		_initializeActivity();
+
+
+		return;
+
+	} // END onOpen()
+
+
+	/**
+	 * Init activity with menu etc.
+	 *
+	 * @private
+	 * @method _initializeActivity
+	 * @return void
+	 */
+	function _initializeActivity() {
+
+		// DEBUG
+		Ti.API.debug('[AndroidMenu]._initializeActivity()');
+
 
 		// build up menu
-		activity.onCreateOptionsMenu = function(e) {
-			
+		activity.onCreateOptionsMenu = function(createOptionsMenuEvent) {
+
 			// fetch menu object
-			var menu = e.menu;
+			menu = createOptionsMenuEvent.menu;
 
 
 			// clear menu before building it up new
@@ -185,12 +257,82 @@ function Menu(_win, _winAlreadyOpen) {
 			menuItemObjects.length = 0;
 
 
-			menuItems.forEach(function(options) {
-				
-				var onClick =		options.onClick,
-					onCollapse =	options.onCollapse,
-					onExpand =		options.onExpand;
-				
+			// create menu items
+			_createMenuItems(menuItems);
+
+
+			return;
+
+		}; // END onCreateOptionsMenu()
+
+
+		// fetch action bar reference
+		if (activity.actionBar) {
+
+			actionBar = activity.actionBar;
+
+			actionBar.onHomeIconItemSelected = function() {
+				trigger('homeIconItemSelected');
+			};
+
+			trigger('openActionBar', true);
+		}
+
+
+		return;
+
+	} // END _initializeActivity()
+
+
+	/**
+	 * Creates Android menu items
+	 *
+	 * @private
+	 * @method _createMenuItems
+	 * @param {Dictonary/Dictonary[]} args
+	 * @return {Menu} this
+	 */
+	function _createMenuItems(args) {
+
+		// DEBUG
+		Ti.API.debug('[AndroidMenu]._createMenuItems()', 'args', JSON.stringify(args));
+
+
+		var Tools = require('/helpers/common/tools'),
+		    itemOptions = [],
+		    argsType = Tools.type(args);
+
+
+		if (menu) {
+
+			if (argsType === 'object') {
+
+				itemOptions.push(args);
+			}
+			else if (argsType === 'array') {
+
+				itemOptions = args;
+			}
+			else {
+
+				return $;
+			}
+
+
+			// DEBUG
+			Ti.API.debug('[AndroidMenu]._createMenuItems()', 'itemOptions', itemOptions, JSON.stringify(itemOptions));
+
+
+			itemOptions.forEach(function(options) {
+
+				// DEBUG
+				Ti.API.debug('[AndroidMenu]._createMenuItems():', Object.keys(options), 'onClick?', !!options.onClick);
+
+
+				var onClick = options.onClick,
+				    onCollapse = options.onCollapse,
+				    onExpand = options.onExpand;
+
 				delete options.onClick;
 				delete options.onCollapse;
 				delete options.onExpand;
@@ -208,50 +350,45 @@ function Menu(_win, _winAlreadyOpen) {
 				if (onExpand) {
 					menuItem.addEventListener('expand', onExpand);
 				}
-				
+
 				menuItemObjects.push(menuItem);
-			});
-		};
 
-		reloadMenu();
+				return $;
 
-		if (activity.actionBar) {
-			
-			actionBar = activity.actionBar;
-
-			actionBar.onHomeIconItemSelected = function() {
-				trigger('homeIconItemSelected');
-			};
-
-			trigger('openActionBar', true);
+			}, $);
 		}
-		
-		return;
-		
-	} // END onOpen()
-	
-	
+
+		return $;
+
+	} // END _createMenuItems()
+
+
 	/**
-	 * Reloads menu by executing invalidateOptionsMenu on 
+	 * Reloads menu by executing invalidateOptionsMenu on
 	 * current window activity
-	 * 
+	 *
 	 * @private
 	 * @method reloadMenu
 	 * @return void
 	 */
 	function reloadMenu() {
-		
+
+		// DEBUG
+		Ti.API.debug('[AndroidMenu].reloadMenu():activity =', activity);
+
+
 		if (activity) {
 			activity.invalidateOptionsMenu();
 		}
-		
+
 		return;
-		
+
 	} // END reloadMenu()
 
-	
+
 	// define actionBar methods
 	$.actionBar = {
+
 		hide: function() {
 
 			if (actionBar === null) {
@@ -295,7 +432,7 @@ function Menu(_win, _winAlreadyOpen) {
 		},
 
 		menu: $
-		
+
 	}; // END $.actionBar
 
 
@@ -306,10 +443,10 @@ function Menu(_win, _winAlreadyOpen) {
 		$.actionBar[method] = function(val) {
 
 			if (actionBar === null) {
+
 				on('openActionBar', function() {
 					$.actionBar[method](val);
 				});
-
 			}
 			else {
 				actionBar[method](val);
@@ -317,263 +454,356 @@ function Menu(_win, _winAlreadyOpen) {
 
 			return $.actionBar;
 		};
-		
+
 	}); // END forEach()
 
 
 	/**
 	 * Returns ActionBar reference object
-	 * 
+	 *
 	 * @public
 	 * @method getActionBar
 	 * @return {Object} this.actionBar
 	 */
 	$.getActionBar = function() {
-		
+
 		return $.actionBar;
-		
+
 	}; // END getActionBar()
 
-	
+
 	/**
-	 * Returns instance of this menu
-	 * 
+	 * Returns instance of the Android menu or if null,
+	 * than it returns this instance
+	 *
 	 * @public
 	 * @method getMenu
-	 * @return {Menu} this
+	 * @return {Ti.Android.Menu/Menu} this
 	 */
 	$.getMenu = function() {
-		
-		return $;
-		
+
+		return menu;
+
 	}; // getMenu()
+
+
+	/**
+	 * Return Android menu item object references
+	 *
+	 * @public
+	 * @method getMenuItems
+	 * @return {Ti.Android.MenuItem[]} menuItemObjects
+	 */
+	$.getMenuItems = function() {
+
+		return menu.getItems();
+
+	}; // END getMenuItems()
 
 
 	/**
 	 * Clears menu item references. Doesnot reload
 	 * or remove currently visible items.
-	 * 
+	 *
 	 * @public
 	 * @method clear
 	 * @return {Menu} this
 	 */
 	$.clear = function() {
-		
-		menuItems.length =			0;
-		menuItemObjects.length =	0;
-		
+
+		menu.clear();
+
+		menuItems.length = 0;
+		menuItemObjects.length = 0;
+
 		return $;
-		
+
 	}; // clear()
 
 
 	/**
-	 * Sets array of menu items as menu items. Discard 
+	 * Sets array of menu items as menu items. Discard
 	 * all old menu items. Reloads menu after setting new items.
-	 * 
+	 *
 	 * @public
 	 * @method set
 	 * @param {Dictonary[]} mItems
 	 */
 	$.set = function(mItems) {
-		
+
 		menuItems = mItems;
 
 		reloadMenu();
-		
+
 		return $;
-		
+
 	}; // END set()
-	
-	
+
+
 	/**
 	 * Reloads menu by execute invalditeOptionsMenu function
-	 * 
+	 *
 	 * @public
 	 * @method reload
 	 * @return {Menu} this
 	 */
 	$.reload = function() {
-		
+
 		reloadMenu();
-		
-		return $;		
-		
+
+		return $;
+
 	}; // END reload()
-	
-	
+
+
 	/**
 	 * Sets all menu items to hidden
-	 * 
+	 *
 	 * @public
 	 * @method hide
 	 * @param {Number[]} itemsToHide
-	 * @return {Menu} this 
+	 * @return {Menu} this
 	 */
 	$.hide = function(itemsToHide) {
-		
-		// load toolbox
-		var Tools =				require('/helpers/common/tools'),
-			filteredMenuItems =	menuItemObjects;
-		
-		
-		// if given filter only items to show
-		if (itemsToHide && Tools.type(itemsToHide) === 'array') {
-			
-			filteredMenuItems = filteredMenuItems.filter(function(menuItem, menuItemIndex) {
-				
-				return (Tools.contains(itemsToHide, menuItem.getItemId()) !== false);
-			});
+
+		if (menu) {
+
+			// load toolbox
+			var Tools = require('/helpers/common/tools');
+
+
+			// if given filter menu items to show
+			if (itemsToHide && Tools.type(itemsToHide) === 'array' && itemsToHide.length) {
+
+				itemsToHide.forEach(function(itemID) {
+
+					var item = menu.findItem(itemID);
+
+					if (item) {
+
+						return item.setVisible(false);
+					}
+
+					return;
+
+				}, $);
+			}
+			// else show all menu items
+			else {
+
+				menu.getItems().forEach(function(item) {
+
+					return item.setVisible(false);
+
+				}, $);
+			}
 		}
-		
-		
-		// hide menu items
-		if (menuItemObjects && menuItemObjects.length) {
-			
-			menuItemObjects.forEach(function(menuItem) {
-				
-				menuItem.setVisible(false);
-				
-				return this;	
-			}, $);
-		}
-		
+
 		return $;
-		
+
 	}; // END hide()
-	
-	
+
+
 	/**
 	 * Sets all menu items to visible
-	 * 
+	 *
 	 * @public
 	 * @method show
 	 * @param {Number[]} itemsToShow
 	 * @return {Menu} this
 	 */
 	$.show = function(itemsToShow) {
-		
-		// load toolbox
-		var Tools =				require('/helpers/common/tools'),
-			filteredMenuItems =	menuItemObjects;
-		
-		
-		// if given filter only items to show
-		if (itemsToShow && Tools.type(itemsToShow) === 'array') {
-			
-			filteredMenuItems = filteredMenuItems.filter(function(menuItem, menuItemIndex) {
-				
-				return (Tools.contains(itemsToShow, menuItem.getItemId()) !== false);
-			});
+
+		if (menu) {
+
+			// load toolbox
+			var Tools = require('/helpers/common/tools');
+
+
+			// if given filter menu items to show
+			if (itemsToShow && Tools.type(itemsToShow) === 'array' && itemsToShow.length) {
+
+				itemsToShow.forEach(function(itemID) {
+
+					var item = menu.findItem(itemID);
+
+					if (item) {
+
+						return item.setVisible(true);
+					}
+
+					return;
+
+				}, $);
+			}
+			// else show all menu items
+			else {
+
+				menu.getItems().forEach(function(item) {
+
+					return item.setVisible(true);
+
+				}, $);
+			}
 		}
-		
-		
-		// show menu items		
-		if (filteredMenuItems && filteredMenuItems.length) {
-			
-			filteredMenuItems.forEach(function(menuItem) {
-				
-				menuItem.setVisible(true);
-				
-				return this;	
-			}, $);
-		}
-		
+
 		return $;
-		
+
 	}; // END show()
-	
-	
+
+
 	/**
 	 * Toggles hidden and visible menu items to invert state
-	 * 
+	 *
 	 * @public
 	 * @method toggle
 	 * @return {Menu} this
 	 */
 	$.toggle = function() {
-		
-		if (menuItemObjects && menuItemObjects.length) {
-			
-			menuItemObjects.forEach(function(menuItem) {
-				
-				menuItem.setVisible(!menuItem.getVisible());
-				
-				return this;	
+
+		if (menu) {
+
+			menu.getItems().forEach(function(item) {
+
+				item.setVisible(!item.isVisible());
+
+				return $;
+
 			}, $);
 		}
-		
+
 		return $;
-		
+
 	}; // toggle()
-	
-	
+
+
 	/**
 	 * Adds menu item with options from dictonary and
 	 * reloads menu
-	 * 
+	 *
 	 * @public
 	 * @method add
 	 * @param {Dictonary} options
 	 * @return {Menu} this
 	 */
 	$.add = function(options) {
-		
+
+		// DEBUG
+		Ti.API.debug('[AndroidMenu].add():', 'menu', menu, 'activity', activity);
+
+
 		menuItems.push(options);
 
-		reloadMenu();
 
-		// TODO: Return a menuItem object allowing on/off/remove etc
+		if (menu) {
+
+			_createMenuItems(options);
+		}
+		else {
+
+			reloadMenu();
+		}
+
+
 		return $;
-		
+
 	}; // END add()
-	
-	
+
+
 	/**
-	 * Destroys menu, by removing callback functions, 
+	 * Removes item and reloads menu
+	 *
+	 * @public
+	 * @method remove
+	 * @param {Number} menuItemID
+	 * @returns {Menu} $/this
+	 */
+	$.remove = function(menuItemID) {
+
+		if (menuItemID && menu && menu.findItem(menuItemID)) {
+
+			menu.removeItem(menuItemID);
+
+			var Tools = require('/helpers/common/tools'),
+			    rejectPattern = {'itemId': menuItemID};
+
+			menuItems = Tools.reject(menuItems, rejectPattern);
+			menuItemObjects = Tools.reject(menuItemObjects, rejectPattern);
+
+
+			// GC
+			Tools = null;
+			rejectPattern = null;
+		}
+
+		return $;
+
+	}; // END remove()
+
+
+	/**
+	 * Removes menu items with given group ID
+	 *
+	 * @public
+	 * @method removeGroup
+	 * @param {Number} groupID
+	 * @return {Menu} this/$
+	 */
+	$.removeGroup = function(groupID) {
+
+		if (groupID && menu) {
+
+			menu.removeGroup(groupID);
+
+			var Tools = require('/helpers/common/tools'),
+			    rejectPattern = {'groupId': groupID};
+
+			menuItems = Tools.reject(menuItems, rejectPattern);
+			menuItemObjects = Tools.reject(menuItemObjects, rejectPattern);
+
+
+			// GC
+			Tools = null;
+			rejectPattern = null;
+		}
+
+		return $;
+
+	}; // END removeGroup()
+
+
+	/**
+	 * Destroys menu, by removing callback functions,
 	 * clearing menu and nulling out references
-	 * 
+	 *
 	 * @public
 	 * @method destroy
 	 * @return void
 	 */
 	$.destroy = function() {
-		
+
 		// hide & clear menu
 		$.hide();
 		$.clear();
 		$.reload();
-		
-		
-		// memory management		
-		activity.onCreateOptionsMenu =	null;		
-		activity.onPrepareOptionsMenu =	null;
-		
-		activity =	null;
-		win =		null;
-		$ =			null;
-		
+
+
+		// GC
+		activity.onCreateOptionsMenu = null;
+		activity.onPrepareOptionsMenu = null;
+
+		activity = null;
+		win = null;
+		menu = null;
+		$ = null;
+
 		return;
-		
+
 	}; // END destroy()
-	
-	
-	/**
-	 * Return menu item object references
-	 * 
-	 * @public
-	 * @method getMenuItems
-	 * @return {Ti.Android.MenuItem[]} menuItemObjects
-	 */
-	$.getMenuItems = function() {
-		
-		return menuItemObjects;
-		
-	}; // END getMenuItems()
-	
-	
+
+
 	return $;
-	
+
 } // END Menu()
 
 

@@ -1,46 +1,55 @@
 {
-  "name": "app-name",
-  "version": "0.0.1",
-  "main": "gulp.js",
-  "authors": [
-    "die.interaktiven GmbH & Co. KG",
-    "Konstantin Büschel <konstantin@die-interaktiven.de>"
-  ],
-  "description": "Titanium Mobile App Template",
-  "homepage": "https://bitbucket.org/konstantin_interaktiv/ti-app-scaffold",
-  "private": true,
-  "dependencies": {
-    "momentjs": "~2.8.2",
-    "q": "~2.0.2",
-    "lodash": "~2.4.1",
-    "async": "~0.9.0"
-  },
-  "preen": {
-    "momentjs": [
-      "min/moment-with-locales.js"
-    ],
-    "q": [
-      "q.js"
-    ],
-    "lodash": [
-      "dist/lodash.min.js"
-    ],
-    "async": [
-      "lib/async.js"
-    ]
-  },
-  "overrides": {
-    "momentjs": {
-      "main": "min/moment-with-locales.js"
-    },
-    "q": {
-      "main": "q.js"
-    },
-    "lodash": {
-      "main": "dist/lodash.min.js"
-    },
-    "async": {
-      "main": "lib/async.js"
-    }
-  }
+	"name":            "Ti App Scaffold",
+	"version":         "1.0.0",
+	"main":            "gulpfile.js",
+	"authors":         [
+		"die.interaktiven GmbH & Co. KG",
+		"Konstantin Büschel <konstantin@die-interaktiven.de>"
+	],
+	"description":     "Titanium Mobile Classic App Template",
+	"homepage":        "https://bitbucket.org/konstantin_interaktiv/ti-app-scaffold",
+	"private":         true,
+	"dependencies":    {
+		"momentjs": "~2.8.2",
+		"q":        "~2.0.2",
+		"lodash":   "~2.4.1",
+		"async":    "~0.9.0",
+		"backbone": "~1.1.2"
+	},
+
+	"preen":           {
+		"momentjs": [
+			"min/moment-with-locales.js"
+		],
+		"q":        [
+			"q.js"
+		],
+		"lodash":   [
+			"dist/lodash.min.js"
+		],
+		"async":    [
+			"lib/async.js"
+		],
+		"backbone": [
+			"backbone.js"
+		]
+	},
+
+	"overrides":       {
+		"momentjs": {
+			"main": "min/moment-with-locales.js"
+		},
+		"q":        {
+			"main": "q.js"
+		},
+		"lodash":   {
+			"main": "dist/lodash.min.js"
+		},
+		"async":    {
+			"main": "lib/async.js"
+		},
+		"backbone": {
+			"main": "backbone.js"
+		}
+	}
 }

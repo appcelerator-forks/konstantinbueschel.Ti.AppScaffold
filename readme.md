@@ -2,66 +2,40 @@
 
 This is a Titanium Mobile App Template. You need some tools to get an app scaffold, which will be described next.
 
- <p>&nbsp;</p>
-
 # Installation
 
-- Install **Ruby** on your machine (only windows)
+- Install **Ruby** on your machine (windows only)
 
 - Install **Node.js** with **NPM** on your machine
 
-- Install **gulp CLI** (globally) on your machine
-	<pre><code>npm install gulp -g</code></pre>
+- Install **gulp CLI** (globally) on your machine <code>npm install gulp -g</code>
 
-- Install **bundler** (Ruby Package manager) on your machine
-	<pre><code>gem install bundler</code></pre>
+- Install **bundler** (Ruby Package manager) on your machine <code>gem install bundler</code>
 
 - Checkout files from Repo into your project directory
 
-- Change to project directory and install required gems (from Gemfile)
-	<pre><code>bundle install</code></pre>
+- Change to project directory and install required gems (from Gemfile) <code>bundle install</code>
 
-- Run required node packages from project directory
-	<pre><code>npm install</code></pre>
+- Run required node packages from project directory <code>npm install</code>
 
-- Install required Titanium Mobile modules from project directory (modules are read from **tiapp.xml**)
-	<pre><code>gittio install</code></pre>
-
-<p>&nbsp;</p>
+- Install required Titanium Mobile modules from project directory (modules are read from **tiapp.xml**) <code>gittio install</code>
 
 # Usage
 ## Initiation
 
-- Run Gulp Task "**init**" to get files from **Bower** and let them be copied to the right place.
-	<pre><code>gulp init</code></pre>
+- Run gulp task to init app scaffold. <code>gulp init</code>
 
-- Install javascript modules via **bower**
-	<pre><code>bower install *NAME* --save[-dev]</code></pre>
+- Install javascript modules via bower <code>bower install *NAME* --save[-dev]</code>
 
-- Search node modules via **npm**
-	<pre><code>npm  search *NAME*</code></pre>
-
-- Install node modules via **npm**
-	<pre><code>npm install *NAME* --save[-dev]</code></pre>
-
-<p>&nbsp;</p>
+- Install node modules via npm <code>npm install *NAME* --save[-dev]</code>
 
 ## Development
 
-- Run Gulp Task "**ti:build**" to start simulator
-	<pre><code>gulp ti:build</code></pre>
-
-- Run Gulp Task "**ti:clean**" to clean build folder/project
-	<pre><code>gulp ti:clean</code></pre>
+- Run gulp task to empty dist folder <code>gulp clean:dist</code>
+- Hide and show debug outputs per gulp task <code>gulp debug:hide / gulp debug:show</code>
 	
-<p>&nbsp;</p>
-
 ## Deployment
 
-- Run Gulp Task "**installer**" to build and upload to installer. Installr configuration can be found at **installrconfig.json** file.
-	<pre><code>gulp init</code></pre>
+- Run gulp to upload to installr and clean dist folder. Installr configuration can be found at **installrfile.json** file. <code>gulp installr</code>
 	
-- Also it is possible to run Gulp Task "**installr:build**" to only build .ipa or .apk file. 
-	<pre><code>gulp installr:build</code></pre>
-	
-- Or upload a build directly to installr with the Gulp Task "**installr:upload**".	<pre><code>gulp installr:upload</code></pre>
+- Or upload only a build to installr with gulp <code>gulp installr:upload</code>

@@ -1,15 +1,40 @@
+/*
+ * gulpfile.js
+ *
+ * /gulpfile.js
+ *
+ * This module represents the gulpfile for this app project
+ *
+ * Author:		kbueschel
+ * Date:		2015-01-09
+ *
+ * Maintenance Log
+ *
+ * Author:
+ * Date:
+ * Changes:
+ *
+ * Copyright (c) 2014 by die.interaktiven GmbH & Co. KG. All Rights Reserved.
+ * Proprietary and Confidential - This source code is not for redistribution
+ */
+
 'use strict';
 
-var gulp           = require('gulp'),
-    $              = require('gulp-load-plugins')(),
-    del            = require('del'),
-    args           = require('yargs').argv,
-    preen          = require('preen'),
-    runSequence    = require('run-sequence'),
-    bowerFiles     = require('main-bower-files'),
-    tiApp          = require('tiapp.xml').load('./tiapp.xml'),
-    exec           = require('child_process').exec,
-    installrConfig = require('./installrfile.json');
+var gulp         = require('gulp'),
+    $            = require('gulp-load-plugins')(),
+    runSequence  = require('run-sequence'),
+    tiApp        = require('tiapp.xml').load('./tiapp.xml'),
+    tiStealth    = require('ti-stealth'),
+    childProcess = require('child_process'),
+    exec         = childProcess.exec,
+    nconf        = require('nconf'),
+    fs           = require('fs'),
+    plist        = require('plist'),
+    path         = require('path'),
+    _            = require('lodash'),
+    del          = require('del'),
+    preen        = require('preen'),
+    bowerFiles   = require('main-bower-files');
 
 
 /**********************************************************************************
@@ -20,25 +45,35 @@ var CONFIG = {
 
 	DIRECTORIES: {
 		BOWER:                 './bower_components',
-		BOWER_DESTINATION_MAP: {
-
-		}
-	},
-
-	OS:          (args.os || 'ios').toLowerCase(),
-	ENVIRONMENT: (args.env || args.environment || 'development'),
-	APP_VERSION: ('Version-' + tiApp.version)
+		BOWER_DESTINATION_MAP: {}
+	}
 };
 
 
-var isDevelopmentEnv = CONFIG.ENVIRONMENT === 'development',
-    isProductionEnv  = CONFIG.ENVIRONMENT === 'production';
+nconf.argv().env();
+
+nconf.file({file: './installrfile.json'});
+
+nconf.defaults({
+
+	'os':                'ios',
+	'environment':       'development',
+	'env':               'development',
+	'app_version':       ('Version-' + tiApp.version),
+	'releaseNotes':      ('Version-' + tiApp.version), // installr release notes
+	'settingsPlistPath': './platform/iphone/Settings.bundle/Root.plist',
+	'settingsXMLPath':   './i18n/de/strings.xml'
+});
+
+var ENV              = nconf.get('environment'),
+
+    isDevelopmentEnv = ENV === 'development',
+    isProductionEnv  = ENV === 'production';
 
 
 /**********************************************************************************
  * SCSS
  * ********************************************************************************/
-
 gulp.task('scss', function () {
 
 	gulp.src([CONFIG.DIRECTORIES.SOURCE + '/scss/**/*.scss'])
@@ -55,18 +90,23 @@ gulp.task('scss', function () {
 		.pipe($.if(isDevelopmentEnv, gulp.dest(CONFIG.DIRECTORIES.TEMP + '/css')))
 		.pipe($.if(isProductionEnv, gulp.dest(CONFIG.DIRECTORIES.DEPLOYMENT + '/css')))
 		.pipe($.size({title: 'css'}))
-
 });
 
 
 /**********************************************************************************
  * CLEAN
  * ********************************************************************************/
-
 gulp.task('clean', function (callback) {
 
 	// delete Bower dir
 	del([CONFIG.DIRECTORIES.BOWER + '*'], callback);
+});
+
+
+gulp.task('clean:dist', function () {
+
+	return gulp.src([path.join(nconf.get('appFileDir'), '*'), '!*.md'], {read: false})
+		.pipe($.rimraf());
 });
 
 
@@ -77,180 +117,184 @@ gulp.task('preen', ['bower'], function (callback) {
 });
 
 
-gulp.task('ti:clean', function(callback) {
+/**********************************************************************************
+ * VERSIONING
+ * ********************************************************************************/
+gulp.task('versioning', function (callback) {
 
-	var cliCommand = "ti clean",
-	    cliArgs = [];
+	// set new build number
+	var stamp = Math.round((new Date()).getTime() / 1000),
+	    versions = tiApp.version.split('.');
 
-	cliArgs.unshift(cliCommand);
+	versions[3] = stamp.toString();
+
+	tiApp.version = versions.join('.');
 
 
-	// LOG
-	console.log('CLI command: ', cliArgs.join(' '));
+	// update Android version name and code
+	var androids = tiApp.doc.documentElement.getElementsByTagName('android');
+
+	if (androids.length === 1) {
+
+		var manifests = androids.item(0).getElementsByTagName('manifest');
+
+		if (manifests.length === 1) {
+
+			var manifest = manifests.item(0);
+
+			manifest.setAttribute('android:versionName', versions.slice(0, 3).join('.'));
+			manifest.setAttribute('android:versionCode', stamp);
+		}
+	}
+
+	tiApp.write();
 
 
-	var ti = exec(cliArgs.join(' '), {
+	// update iOS root.plist app version default value
+	var settingsPlistPath = nconf.get('settingsPlistPath');
 
-		maxBuffer: (2000 * 1024)
-	});
+	if (fs.existsSync(settingsPlistPath)) {
 
-	ti.stdout.on('data', function (data) {
-		console.log(data);
-	});
+		var settingsPlist = plist.parse(fs.readFileSync(settingsPlistPath, 'utf-8'));
 
-	ti.stderr.on('data', function (data) {
-		console.log(data);
-	});
+		settingsPlist.PreferenceSpecifiers.forEach(function (setting, index) {
 
-	ti.on('close', function (code) {
+			if (setting.Title && setting.Title === 'App Version') {
 
-		console.log('Finished with code: ', code);
-		callback(code != 0);
-	});
+				setting.DefaultValue = versions.slice(0, 3).join('.');
+			}
+
+			return;
+		});
+
+		fs.writeFileSync(settingsPlistPath, plist.build(settingsPlist));
+	}
+
+
+	// update Android strings.xml
+	var settingsXMLPath = nconf.get('settingsXMLPath');
+
+	if (fs.existsSync(settingsXMLPath)) {
+
+		return gulp.src(settingsXMLPath)
+
+			.pipe($.xmlEditor([
+				{path:    '//string[@name="preferences_app_version_title"]',
+					text: ('App Version ' + versions.slice(0, 3).join('.'))
+				}
+			]))
+
+			.pipe(gulp.dest(path.dirname(settingsXMLPath)))
+
+			.pipe($.notify('Bumped version to: ' + tiApp.version));
+	}
+
+
+	return gulp.src('./dist')
+		.pipe($.notify('Bumped version to: ' + tiApp.version));
 });
 
 
 /**********************************************************************************
- * TITANIUM MOBILE
+ * DEBUGGING
  * ********************************************************************************/
+gulp.task('debug:hide', function () {
 
-gulp.task('ti:build', function(callback) {
+	var files = fs.listFilesSync('./Resources', {
 
-	var cliCommand = "ti build",
+		    recursive:  true,
+		    prependDir: true,
+		    filter:     function (filePath) {
 
-	    cliArgs = [
-		    ("-p " + CONFIG.OS)
-	    ];
+			    return filePath.match(/\.js$/);
+		    }
+	    }),
 
-	cliArgs.unshift(cliCommand);
-
-
-	if (!args.noRetina) {
-
-		cliArgs.push('--tall');
-		cliArgs.push('--retina');
-	}
-
-	if (CONFIG.OS === 'ios' && !args.I) {
-
-		cliArgs.push('-I 7.1');
-	}
-
-	delete args.noRetina;
-	delete args.os;
-	delete args.env;
-	delete args.environment;
-	delete args.gulp;
+	    excludeFiles = ['moment.js', 'q.js', 'async.js'],
+	    stealthedFiles = [];
 
 
-	var argsProp;
+	_.each(files, function (filePath) {
 
-	for (argsProp in args) {
 
-		cliArgs.push(args[argsProp]);
-	}
+		if (!_.contains(excludeFiles, path.basename(filePath))) {
+
+			var enabledFile = tiStealth.enable({
+
+				input:     filePath,
+				notLevels: ['errors, info']
+			});
+
+
+			if (enabledFile.length && _.isArray(enabledFile)) {
+
+				stealthedFiles = stealthedFiles.concat(enabledFile);
+			}
+		}
+
+		return;
+	});
 
 
 	// LOG
-	console.log('CLI command: ', cliArgs.join(' '));
+	return gulp.src('./dist')
+		.pipe($.notify('App Debugging output stealthed for ' + stealthedFiles.length + ' file(s)'));
+});
 
 
-	var ti = exec(cliArgs.join(' '), {
+gulp.task('debug:show', function () {
 
-		maxBuffer: (10000 * 1024)
-	});
+	var restoredFiles = tiStealth.restore('./Resources');
 
-	ti.stdout.on('data', function (data) {
-		console.log(data);
-	});
 
-	ti.stderr.on('data', function (data) {
-		console.log(data);
-	});
-
-	ti.on('close', function (code) {
-
-		console.log('Finished with code: ', code);
-		callback(code != 0);
-	});
+	// LOG
+	return gulp.src('./dist')
+		.pipe($.notify('App Debugging output restored for ' + restoredFiles.length + ' file(s)'));
 });
 
 
 /**********************************************************************************
  * INSTALLR
  * ********************************************************************************/
+gulp.task('installr:upload', function (callback) {
 
-gulp.task('installr:build', function (callback) {
-
-	var cliCommand = "titanium build",
-
-	    cliArgs = [
-		    ("-O '" + installrConfig.appFileDir + "'"), // output dir
-		    ("-p '" + CONFIG.OS + "'"), // target platform
-		    "-d './'", // project dir
-		    "-b", // build-only flag
-		    "-f", // force full rebuild flag
-		    "--no-prompt" // disable interactive prompting
-	    ];
-
-
-	switch (CONFIG.OS) {
-
-		case 'ios':
-
-			cliArgs.push("-P '" + installrConfig.provisioningUUID + "'"); // provisioning profile uuid
-			cliArgs.push("-R '" + installrConfig.distCertificateName + "'"); // distribution certificate name
-			cliArgs.push("-T dist-adhoc"); // target ios
-
-			break;
-
-		case 'android':
-
-			cliArgs.push("-T dist-playstore"); // target android
-
-			break;
-	}
+	var appFileName = '',
+	    appFiles = fs.readdirSync(nconf.get('appFileDir'));
 
 
 	// LOG
-	console.log('CLI command: ', cliCommand, cliArgs.join(' '));
+	console.log('App files: ', appFiles);
 
 
-	cliArgs.unshift(cliCommand);
+	if (!appFiles.length) {
+
+		callback();
+		return;
+	}
 
 
-	var ti = exec(cliArgs.join(' '), {
+	// fetch first filename
+	appFiles.forEach(function (filename) {
 
-		maxBuffer: (5000 * 1024)
+		if (_.isEmpty(appFileName) && path.extname(filename)) {
+
+			appFileName = filename;
+		}
+
+		return;
 	});
 
-	ti.stdout.on('data', function (data) {
-		console.log(data);
-	});
-
-	ti.stderr.on('data', function (data) {
-		console.log(data);
-	});
-
-	ti.on('close', function (code) {
-
-		console.log('Finished with code: ', code);
-		callback(code != 0);
-	});
-});
+	appFileName = appFiles[0];
 
 
-gulp.task('installr:upload', function (callback) {
-
-	installrConfig.releaseNotes = (installrConfig.releaseNotes && installrConfig.releaseNotes.length ? installrConfig.releaseNotes : CONFIG.APP_VERSION);
-
+	// define cli options
 	var cliCommand = "curl",
 
 	    cliArgs = [
-		    ("-H 'X-InstallrAppToken: " + installrConfig.apiToken + "' https://www.installrapp.com/apps.json "),
-		    ("-F 'qqfile=@" + installrConfig.appFileDir + installrConfig.appFile + "' "),
-		    ("-F 'releaseNotes=" + installrConfig.releaseNotes + "' "),
-		    ("-F 'notify=" + installrConfig.notify + "'")
+		    ("-H 'X-InstallrAppToken: " + nconf.get('apiToken') + "' " + nconf.get('endpoint')),
+		    ("-F 'qqfile=@" + nconf.get('appFileDir') + appFileName + "' "),
+		    ("-F 'releaseNotes=" + nconf.get('releaseNotes') + "' "),
+		    ("-F 'notify=" + nconf.get('notify') + "'")
 	    ];
 
 
@@ -258,8 +302,11 @@ gulp.task('installr:upload', function (callback) {
 	console.log('CLI Command: ', cliCommand, cliArgs.join(' '));
 
 
-	cliArgs.unshift(cliCommand)
+	// add cli command before cli args
+	cliArgs.unshift(cliCommand);
 
+
+	// concat whole cli command and execute it
 	var curl = exec(cliArgs.join(' '), {
 
 		maxBuffer: (5000 * 1024)
@@ -289,14 +336,13 @@ gulp.task('installr:upload', function (callback) {
 
 gulp.task('installr', function (callback) {
 
-	runSequence('installr:build', 'installr:upload', callback);
+	runSequence('installr:upload', 'clean:dist', callback);
 });
 
 
 /**********************************************************************************
  * INIT
  * ********************************************************************************/
-
 gulp.task('bower', function () {
 
 	return $.bower();
@@ -308,11 +354,12 @@ gulp.task('init', ['bower', 'preen'], function () {
 	var momentFilter = $.filter('moment-with-locales.js'),
 	    lodashFilter = $.filter('q.js'),
 	    queueFilter = $.filter('lodash.min.js'),
-	    asyncFilter = $.filter('async.js');
+	    asyncFilter = $.filter('async.js'),
+	    backboneFilter = $.filter('backbone.js');
 
 
 	return gulp.src(bowerFiles({
-		env: CONFIG.ENVIRONMENT
+		env: nconf.get('environment')
 	}))
 
 		.pipe(momentFilter)
@@ -324,6 +371,10 @@ gulp.task('init', ['bower', 'preen'], function () {
 		.pipe($.rename('lodash.js'))
 		.pipe(gulp.dest('Resources/helpers/common'))
 		.pipe(lodashFilter.restore())
+
+		.pipe(backboneFilter)
+		.pipe(gulp.dest('Resources/helpers/common'))
+		.pipe(backboneFilter.restore())
 
 		.pipe(queueFilter)
 		.pipe($.rename('q.js'))

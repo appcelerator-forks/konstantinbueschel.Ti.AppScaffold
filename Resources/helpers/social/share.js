@@ -1,18 +1,37 @@
+/*
+ * share.js
+ *
+ * /Resources/helpers/social/share.js
+ *
+ * This module represents an cross-platform social share module
+ *
+ * Author:		kbueschel
+ * Date:		2015-01-09
+ *
+ * Maintenance Log
+ *
+ * Author:
+ * Date:
+ * Changes:
+ *
+ * Copyright (c) 2014 by die.interaktiven GmbH & Co. KG. All Rights Reserved.
+ * Proprietary and Confidential - This source code is not for redistribution
+ */
 
 // variable declaration
-var ios =		(Ti.Platform.name === 'iPhone OS'), 
-	android =	(Ti.Platform.name === 'android'), 
-	ipad =		(ios && Ti.Platform.osname === 'ipad'), 
-	
-	callback =			null, 
-	facebook_appid =	null, 
-	facebook_module =	null;
+var ios             = (Ti.Platform.name === 'iPhone OS'),
+    android         = (Ti.Platform.name === 'android'),
+    ipad            = (ios && Ti.Platform.osname === 'ipad'),
+
+    callback        = null,
+    facebook_appid  = null,
+    facebook_module = null;
 
 
 function onSocialComplete(e) {
-	
+
 	if (callback !== null) {
-		
+
 		e.dialogCloseType = 'complete';
 
 		if (e.activityName) {
@@ -25,9 +44,9 @@ function onSocialComplete(e) {
 
 
 function onSocialCancelled(e) {
-	
+
 	if (callback !== null) {
-		
+
 		e.dialogCloseType = 'cancelled';
 
 		if (e.activityName) {
@@ -40,7 +59,7 @@ function onSocialCancelled(e) {
 
 
 if (ios) {
-	
+
 	var Social = require('dk.napp.social');
 
 	Social.addEventListener('complete', onSocialComplete);
@@ -48,7 +67,7 @@ if (ios) {
 }
 
 function twitter(args, _callback) {
-	
+
 	callback = _callback || null;
 
 	_init(args);
@@ -57,7 +76,7 @@ function twitter(args, _callback) {
 }
 
 function _twitter(args) {
-	
+
 	var webUrl = 'https://twitter.com/intent/tweet?url=' + encodeURIComponent(args.url) + '&text=' + encodeURIComponent(args.text);
 	var textUrl = (args.url && args.image) ? (args.text ? args.text + ' ' + args.url : args.url) : args.text;
 
@@ -88,21 +107,21 @@ function _twitter(args) {
 	else {
 
 		try {
-			
+
 			var intent = Ti.Android.createIntent({
-				
+
 				action:			Ti.Android.ACTION_SEND,
 				packageName:	"com.twitter.android",
 				className:		"com.twitter.android.PostActivity",
 				type:			"text/plain"
 			});
-			
+
 			intent.putExtra(Ti.Android.EXTRA_TEXT, textUrl);
 			Ti.Android.currentActivity.startActivity(intent);
 
 		}
 		catch (error) {
-			
+
 			Ti.Platform.openURL(webUrl);
 		}
 	}
@@ -110,7 +129,7 @@ function _twitter(args) {
 
 
 function facebook(args, _callback) {
-	
+
 	callback = _callback || null;
 
 	args = _init(args);
@@ -120,11 +139,11 @@ function facebook(args, _callback) {
 
 
 function _facebook(args) {
-	
+
 	if (ios && Social.isFacebookSupported()) {
-		
+
 		Social.facebook({
-		
+
 			text:	args.text,
 			image:	args.image,
 			url:	args.url
@@ -134,7 +153,7 @@ function _facebook(args) {
 	else if (facebook_appid !== false) {
 
 		if (!facebook_appid) {
-			
+
 			facebook_appid = Ti.App.Properties.getString('ti.facebook.appid', false);
 
 			if (facebook_appid === false) {
@@ -142,46 +161,46 @@ function _facebook(args) {
 			}
 
 			if (_cmpVersion(Ti.version, '3.1.0') >= 0) {
-				
+
 				if (!facebook_module) {
-					
+
 					facebook_module = require('facebook');
 					facebook_module.appid = facebook_appid;
-					
+
 					facebook_module.forceDialogAuth = false;
-			
+
 					if (args.forceDialogAuth === true) {
-						
+
 						facebook_module.forceDialogAuth = true;
 					}
 				}
 			}
 			else {
-				
+
 				Ti.Facebook.appid = facebook_appid;
-				
+
 				Ti.Facebook.forceDialogAuth = false;
-				
+
 				if (args.forceDialogAuth === true) {
-					
+
 					Ti.Facebook.forceDialogAuth = true;
 				}
 			}
 		}
 
 		if (facebook_module) {
-			
+
 			facebook_module.dialog('feed', {
-				
+
 				link:			args.url,
 				caption:		args.caption,
 				description:	args.description || args.text,
 				picture:		args.image_url
-				
+
 			}, function(e) {
-				
+
 				if (e.cancelled) {
-				
+
 					onSocialCancelled({
 						source:		e.source,
 						origin:		e,
@@ -190,9 +209,9 @@ function _facebook(args) {
 					});
 				}
 				else {
-				
+
 					onSocialComplete({
-						
+
 						source:		e.source,
 						origin:		e,
 						success:	e.success,
@@ -203,20 +222,20 @@ function _facebook(args) {
 
 		}
 		else {
-			
+
 			Ti.Facebook.dialog('feed', {
-			
+
 				link:			args.url,
 				caption:		args.caption,
 				description:	args.description || args.text,
 				picture:		args.image_url
-				
+
 			}, function(e) {
-				
+
 				if (e.cancelled) {
-				
+
 					onSocialCancelled({
-						
+
 						source:		e.source,
 						origin:		e,
 						success:	false,
@@ -224,9 +243,9 @@ function _facebook(args) {
 					});
 				}
 				else {
-				
+
 					onSocialComplete({
-						
+
 						source:		e.source,
 						origin:		e,
 						success:	e.success,
@@ -240,7 +259,7 @@ function _facebook(args) {
 
 
 function mail(args, _callback) {
-	
+
 	callback = _callback || null;
 
 	args = _init(args);
@@ -281,6 +300,7 @@ function _mail(args) {
 
 
 function share(args, _callback) {
+
 	callback = _callback || null;
 
 	args = _init(args);
@@ -288,19 +308,24 @@ function share(args, _callback) {
 	if (ios && Social.isActivityViewSupported()) {
 
 		if (ipad) {
-			Social.activityPopover({
-				text: args.url ? (args.text ? args.text + ' ' + args.url : args.url) : args.text,
-				image: args.image,
-				removeIcons: args.removeIcons,
-				view: args.view
-			}, args.customIcons || []);
 
+			Social.activityPopover({
+
+				text:        (args.url ? (args.text ? args.text + ' ' + args.url : args.url) : args.text),
+				image:       args.image,
+				removeIcons: args.removeIcons,
+				view:        args.view
+
+			}, args.customIcons || []);
 		}
 		else {
+
 			Social.activityView({
-				text: args.url ? (args.text ? args.text + ' ' + args.url : args.url) : args.text,
-				image: args.image,
+
+				text:        (args.url ? (args.text ? args.text + ' ' + args.url : args.url) : args.text),
+				image:       args.image,
 				removeIcons: args.removeIcons
+
 			}, args.customIcons || []);
 		}
 
@@ -308,23 +333,28 @@ function share(args, _callback) {
 	}
 
 	if (android) {
+
 		var intent = Ti.Android.createIntent({
 			action: Ti.Android.ACTION_SEND
 		});
 
-		if (args.text) {
-			intent.putExtra(Ti.Android.EXTRA_TEXT, args.text);
+		if (args.text || args.url) {
+
+			intent.putExtra(Ti.Android.EXTRA_TEXT, (args.url ? (args.text ? args.text + ' ' + args.url : args.url) : args.text));
 		}
 
 		if (args.text || args.description) {
+
 			intent.putExtra(Ti.Android.EXTRA_SUBJECT, args.description || args.text);
 		}
 
 		if (args.image_blob) {
+
 			intent.putExtraUri(Ti.Android.EXTRA_STREAM, args.image_blob);
 		}
 
-		var shareActivity = Ti.Android.createIntentChooser(intent, args.titleid ? L(args.titleid, args.title || 'Share') : (args.title || 'Share'));
+
+		var shareActivity = Ti.Android.createIntentChooser(intent, args.titleid ? L(args.titleid, args.title || L('socialShareDialogDefaultTitle', 'Share')) : (args.title || L('socialShareDialogDefaultTitle', 'Share')));
 
 		Ti.Android.currentActivity.startActivity(shareActivity);
 
@@ -345,7 +375,7 @@ function share(args, _callback) {
 	}
 
 	if (!args.removeIcons || args.removeIcons.indexOf('mail') === -1) {
-		options.push(L('Mail'));
+		options.push(L('socialShareButtonMail'));
 		callbacks.push(_mail);
 	}
 
@@ -361,7 +391,7 @@ function share(args, _callback) {
 		return;
 	}
 
-	options.push(L('Cancel'));
+	options.push(L('socialShareButtonCancel'));
 
 	var dialog = Ti.UI.createOptionDialog({
 		cancel: options.length - 1,
@@ -449,4 +479,4 @@ function _cmpVersion(a, b) {
 exports.share = share;
 exports.twitter = twitter;
 exports.facebook = facebook;
-exports.mail = mail; 
+exports.mail = mail;

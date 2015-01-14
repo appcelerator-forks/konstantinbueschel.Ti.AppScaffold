@@ -1,3 +1,158 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+
+	<!-- MENU -->
+	<string name="menuItemTitleContact">Kontakt</string>
+
+	<string name="menuItemTitleSettings">Einstellungen</string>
+	<string name="menuItemTitlePrivacyPolicy">Datenschutz</string>
+	<string name="menuItemTitleImprint">Impressum</string>
+	<string name="menuItemTitleSupport">Support anfragen</string>
+
+
+	<!-- NOTIFICATIONS -->
+	<string name="networkChangeDisconnected">Keine Internetverbindung</string>
+	<string name="networkChangeConnected">Verbunden</string>
+
+	<string name="httpRequestDisconnected">Keine Internetverbindung</string>
+	<string name="httpRequestConnect">Verbindung wird hergestellt ...</string>
+	<string name="httpRequestConnected">Verbunden</string>
+
+	<string name="webViewRequestDisconnected">Keine Internetverbindung</string>
+	<string name="webViewRequestConnect">Wird geladen ...</string>
+	<string name="webViewRequestConnected">Verbunden</string>
+
+	<string name="webViewDefaultLoadErrorMessage">Ladefehler</string>
+
+	<string name="emailDialogNotSupported">Auf Ihrem Gerät besteht keine Möglichkeit eine E-Mail zu versenden oder Sie haben noch keinen E-Mail Account angelegt.</string>
+	<string name="emailDialogSendingSuccess">E-Mail erfolgreich versendet</string>
+	<string name="emailDialogAndroidSendingSuccess">E-Mail Bearbeitung abgeschlossen</string>
+	<string name="emailDialogSendingFailed">E-Mail Versand fehlgeschlagen</string>
+	<string name="emailDialogCommonError">Es ist ein Fehler aufgetreten</string>
+	<string name="emailDialogSaved">E-Mail als Entwurf gespeichert</string>
+	<string name="emailDialogCancelled">E-Mail Versand abgebrochen</string>
+	<string name="defaultLoadingMessage">Wird geladen ...</string>
+
+	<string name="settingsViewErrorTitleSupportEmail">Ups!</string>
+	<string name="settingsViewErrorMessageSupportEmail">Auf Ihrem Gerät besteht keine Möglichkeit eine E-Mail zu versenden oder Sie haben noch keinen E-Mail Account erstellt.</string>
+
+	<string name="errorMessageListViewCurrentlyLoading">Daten werden werden bereits geladen</string>
+
+
+	<!-- MINI BROWSER -->
+	<string name="miniBrowserDefaultLoadErrorMessage">Ladefehler</string>
+	<string name="miniBrowserButtonCloseTitle">Schließen</string>
+
+
+	<!-- WINDOWS -->
+	<string name="windowTitleContact">Kontakt</string>
+	<string name="windowTitlePrivacyPolicy">Datenschutz</string>
+	<string name="windowTitleImprint">Impressum</string>
+	<string name="windowTitleSettings">Einstellungen</string>
+
+
+	<!-- BUTTONS -->
+	<string name="menuButtonID">MENU_BUTTON</string>
+	<string name="contextMenuButtonID">CONTEXT_MENU_BUTTON</string>
+	<string name="shareButtonID">SHARE_BUTTON</string>
+	<string name="addButtonID">ADD_BUTTON</string>
+	<string name="editButtonID">EDIT_BUTTON</string>
+	<string name="deleteButtonID">DELETE_BUTTON</string>
+	<string name="saveButtonID">SAVE_BUTTON</string>
+	<string name="closeButtonID">CLOSE_BUTTON</string>
+
+	<string name="saveButtonTitle">Sichern</string>
+	<string name="closeButtonTitle">Schließen</string>
+	<string name="deleteButtonTitle">Löschen</string>
+
+
+	<!-- SWIPABLE TABLEVIEW ROW -->
+	<string name="swipableRowButtonTitleDelete">Löschen</string>
+	<string name="swipableRowButtonTitleMore">Mehr</string>
+
+
+	<!-- INSTALLR -->
+	<string name="installrUpdaterButtonTitleOk">Ja</string>
+	<string name="installrUpdaterButtonTitleNo">Nein</string>
+	<string name="installrUpdaterMessage">Eine neue Beta Version der App "%s" ist verfügbar. Möchten Sie die neue Beta Version "%s" installieren?</string>
+	<string name="installrUpdaterTitle">Beta Update vorhanden</string>
+
+
+	<!-- SETTINGS ANDROID -->
+	<string name="preferences_title">Einstellungen</string>
+	<string name="preferences_category_title_about">Über</string>
+	<string name="preferences_category_title_common">Allgemein</string>
+	<string name="preferences_app_version_title">App Version 1.0.0</string>
+	<string name="preferences_send_usage_data_title">Nutzungsstatistiken senden</string>
+
+
+	<!-- SETTINGS iOS -->
+	<string name="settingsTitleAppVersionSettings">App Version</string>
+	<string name="settingsHeaderAppVersionSettings">Über</string>
+
+	<string name="settingsTitleSendUsageData">Nutzungsstatistiken senden</string>
+	<string name="settingsHeaderSendUsageData">Über</string>
+
+	<string name="settingsTitleSupport">Support Anfrage stellen</string>
+	<string name="settingsHeaderSupport">Support</string>
+
+	<string name="supportEmailSubject">App Support Anfrage</string>
+	<string name="supportEmailMessage">%s App v.%s \n %s %s %s \n OS Sprache "%s" \n Architektur "%s" \n Memory (frei) "%f.2 Bytes" \n UUID "%s" \n App Session "%s" \n Titanium Build "%s"</string>
+
+
+	<!-- SOCIAL SHARE -->
+	<string name="socialShareDialogDefaultTitle">Teilen</string>
+	<string name="socialShareButtonMail">Senden</string>
+	<string name="socialShareButtonCancel">Abbrechen</string>
+
+
+	<!-- CRASH REPORTER -->
+	<string name="reporter_email_recipients">appsupport@die-interaktiven.de</string>
+	<string name="reporter_alert_title">Ups!</string>
+	<string name="reporter_alert_message">Leider ist ein Fehler aufgetreten, der die App zum Absturz gebracht hat. Möchten Sie einen Bericht an die Entwickler senden?</string>
+	<string name="reporter_alert_no">Nein</string>
+	<string name="reporter_alert_yes">Ja</string>
+	<string name="reporter_email_describe">Bitte beschreiben Sie, was für Schritte Sie durchgeführt haben, bevor der Fehler aufgetreten ist. Damit können die Entwickler den Fehler nachstellen und beheben, danke.</string>
+
+
+	<!-- iTunes UPDATER -->
+	<string name="iTunesUpdaterTitle">Neue App Version verfügbar</string>
+	<string name="iTunesUpdaterMessage">App auf "v.%version" updaten?\n\nNeuerungen:\n%notes</string>
+	<string name="iTunesUpdaterButtonTitleOk">Ja</string>
+	<string name="iTunesUpdaterButtonTitleLater">Nicht jetzt</string>
+	<string name="iTunesUpdaterButtonTitleNever">Nein, danke</string>
+
+
+	<!-- ANALYTICS -->
+	<!-- SCREENS -->
+	<string name="analyticsScreenViewMiniBrowser">Browser</string>
+
+	<!-- EVENTS -->
+	<!-- CATEGORIES -->
+	<string name="analyticsEventCategoryMainMenu">Main-Navigation</string>
+	<string name="analyticsEventCategoryContextMenu">Context-Navigation</string>
+	<string name="analyticsEventCategoryInAppSettings">Settings</string>
+
+	<!-- ACTIONS -->
+	<string name="analyticsEventActionButtonPress">Button Touch</string>
+	<string name="analyticsEventActionChange">Change</string>
+	<string name="analyticsEventActionCancelled">Cancelled</string>
+	<string name="analyticsEventActionSend">Send</string>
+	<string name="analyticsEventActionFailed">Failed</string>
+	<string name="analyticsEventActionError">Error</string>
+	<string name="analyticsEventActionCreate">New</string>
+	<string name="analyticsEventActionEdit">Edit</string>
+	<string name="analyticsEventActionDelete">Delete</string>
+	<string name="analyticsEventActionEnable">Enable</string>
+	<string name="analyticsEventActionDisable">Disable</string>
+	<string name="analyticsEventActionSave">Save</string>
+	<string name="analyticsEventActionOpen">Open</string>
+	<string name="analyticsEventActionClose">Close</string>
+	<string name="analyticsEventActionStateChange">State-Change</string>
+	<string name="analyticsEventActionEmailDialog">Email-Dialog</string>
+
+
+	<!-- App -->
+	<string name="app_name">##APPNAME##</string>
+
 </resources>

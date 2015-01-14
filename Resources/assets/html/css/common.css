@@ -241,7 +241,7 @@ input, select, textarea { background: #fff; -moz-box-sizing: border-box; -webkit
 /* Reusabele Componenets */
 /* Global Sections */
 /* line 1, ../sass/sections/_content.scss */
-section#content { background: transparent; overflow: hidden; padding: 20px; font-size: 0.833em; }
+section#content { background: transparent; overflow: hidden; padding: 20px; font-size: 0.833em; line-height: 1.8; }
 
 /* line 10, ../sass/common.scss */
 * { color: #000000; }

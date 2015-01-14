@@ -1,21 +1,19 @@
 /*
- * Hessentag 2014
- * 
  * conversion.js
- * 
+ *
  * /Resources/helpers/text/conversion.js
- * 
+ *
  * This module represents a toolset of conversion functions for unicode conversation
- * 
+ *
  * Author:		kbueschel
- * Date:		2014-05-22
- * 
+ * Date:		2015-01-09
+ *
  * Maintenance Log
- * 
+ *
  * Author:
  * Date:
  * Changes:
- * 
+ *
  * Copyright (c) 2014 by die.interaktiven GmbH & Co. KG. All Rights Reserved.
  * Proprietary and Confidential - This source code is not for redistribution
  */
@@ -26,11 +24,11 @@ exports.hex2char = function( hex ) {
 	// hex: string, the hex codepoint to be converted
 	var result = '';
 	var n = parseInt(hex, 16);
-    if (n <= 0xFFFF) { result += String.fromCharCode(n); } 
+    if (n <= 0xFFFF) { result += String.fromCharCode(n); }
 	else if (n <= 0x10FFFF) {
 		n -= 0x10000
 		result += String.fromCharCode(0xD800 | (n >> 10)) + String.fromCharCode(0xDC00 | (n & 0x3FF));
-    	} 
+    	}
 	else { result += 'hex2Char error: Code point out of range: '+dec2hex(n); }
 	return result;
 };
@@ -41,11 +39,11 @@ exports.dec2char = function( n ) {
 	// note that no checking is performed to ensure that this is just a hex number, eg. no spaces etc
 	// dec: string, the dec codepoint to be converted
 	var result = '';
-    if (n <= 0xFFFF) { result += String.fromCharCode(n); } 
+    if (n <= 0xFFFF) { result += String.fromCharCode(n); }
 	else if (n <= 0x10FFFF) {
 		n -= 0x10000
 		result += String.fromCharCode(0xD800 | (n >> 10)) + String.fromCharCode(0xDC00 | (n & 0x3FF));
-    	} 
+    	}
 	else { result += 'dec2char error: Code point out of range: '+dec2hex(n); }
 	return result;
 };
@@ -61,17 +59,17 @@ exports. dec2hex2 = function( textString ) {
 
 exports. dec2hex4 = function( textString ) {
 	var hexequiv = new Array ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F");
-	return hexequiv[(textString >> 12) & 0xF] + hexequiv[(textString >> 8) & 0xF] 
+	return hexequiv[(textString >> 12) & 0xF] + hexequiv[(textString >> 8) & 0xF]
 		+ hexequiv[(textString >> 4) & 0xF] + hexequiv[textString & 0xF];
 };
 
 
-exports.convertChar2CP = function( textString ) { 
+exports.convertChar2CP = function( textString ) {
 	var haut = 0;
 	var n = 0;
 	var CPstring = '';
 	for (var i = 0; i < textString.length; i++) {
-		var b = textString.charCodeAt(i); 
+		var b = textString.charCodeAt(i);
 		if (b < 0 || b > 0xFFFF) {
 			CPstring += 'Error in convertChar2CP: byte out of range ' + dec2hex(b) + '!';
 			}
@@ -106,7 +104,7 @@ exports.convertAllEscapes = function(str, numbers) {
 	// converts all escapes in the text str to characters, and can interpret numbers as escapes too
 	// str: string, the text to be converted
 	// numbers: string enum [none, hex, dec, utf8, utf16], what to treat numbers as
-	
+
 	str = convertUnicode2Char(str); //alert(str);
 	str = convertZeroX2Char(str); //alert(str);
 	str = convertHexNCR2Char(str); //alert(str);
@@ -116,70 +114,70 @@ exports.convertAllEscapes = function(str, numbers) {
 	str = convertpEnc2Char(str);  //alert(str);
 	str = convertEntities2Char(str); //alert(str);
 	str = convertNumbers2Char(str, numbers); //alert(str);
-	
+
 	return str;
 };
 
 
-exports.convertUnicode2Char = function( str ) { 
+exports.convertUnicode2Char = function( str ) {
 	// converts a string containing U+... escapes to a string of characters
 	// str: string, the input
-	
+
 	// first convert the 6 digit escapes to characters
-	str = str.replace(/[Uu]\+10([A-Fa-f0-9]{4})/g, 
+	str = str.replace(/[Uu]\+10([A-Fa-f0-9]{4})/g,
 					function(matchstr, parens) {
 						return exports.hex2char('10'+parens);
 						}
-						); 
+						);
 	// next convert up to 5 digit escapes to characters
-	str = str.replace(/[Uu]\+([A-Fa-f0-9]{1,5})/g, 
+	str = str.replace(/[Uu]\+([A-Fa-f0-9]{1,5})/g,
 					function(matchstr, parens) {
 						return exports.hex2char(parens);
 						}
-						); 
+						);
 	return str;
 };
 
-	
-exports.oldconvertUnicode2Char = function( str ) { 
+
+exports.oldconvertUnicode2Char = function( str ) {
 	// converts a string containing U+... escapes to a string of characters
 	// str: string, the input
-	
+
 	// first convert the 6 digit escapes to characters
-	str = str.replace(/U\+10([A-Fa-f0-9]{4})/g, 
+	str = str.replace(/U\+10([A-Fa-f0-9]{4})/g,
 					function(matchstr, parens) {
 						return exports.hex2char('10'+parens);
 						}
-						); 
+						);
 	// next convert up to 5 digit escapes to characters
-	str = str.replace(/U\+([A-Fa-f0-9]{1,5})/g, 
+	str = str.replace(/U\+([A-Fa-f0-9]{1,5})/g,
 					function(matchstr, parens) {
 						return exports.hex2char(parens);
 						}
-						); 
+						);
 	return str;
 };
 
-	
-exports.convertHexNCR2Char = function( str ) { 
+
+exports.convertHexNCR2Char = function( str ) {
 	// converts a string containing &#x...; escapes to a string of characters
 	// str: string, the input
-	
+
 	// convert up to 6 digit escapes to characters
-	str = str.replace(/&#x([A-Fa-f0-9]{1,6});/g, 
+	str = str.replace(/&#x([A-Fa-f0-9]{1,6});/g,
 					function(matchstr, parens) {
 						return exports.hex2char(parens);
 						}
-						); 
+						);
 	return str;
 };
 
-exports.convertDecNCR2Char = function( str ) { 
+exports.convertDecNCR2Char = function( str ) {
 	// converts a string containing &#...; escapes to a string of characters
 	// str: string, the input
-	
+
 	// convert up to 6 digit escapes to characters
-	str = str.replace(/&#([0-9]{1,7});/g, 
+	str = str.replace(/&#([0-9]{1,7});/g,
 					function(matchstr, parens) {
 						return exports.dec2char(parens);
 						}
@@ -187,35 +185,35 @@ exports.convertDecNCR2Char = function( str ) {
 	return str;
 };
 
-exports.convertZeroX2Char = function( str ) { 
+exports.convertZeroX2Char = function( str ) {
 	// converts a string containing 0x... escapes to a string of characters
 	// str: string, the input
-	
-	// convert up to 6 digit escapes to characters
-	str = str.replace(/0x([A-Fa-f0-9]{1,6})/g, 
-					function(matchstr, parens) {
-						return hex2char(parens);
-						}
-						); 
-	return str;
-};
 
-exports.convertCSS2Char = function( str, convertbackslash ) { 
-	// converts a string containing CSS escapes to a string of characters
-	// str: string, the input
-	// convertbackslash: boolean, true if you want \x etc to become x or \a to be treated as 0xA
-	
-	// convert up to 6 digit escapes to characters & throw away any following whitespace
-	if (convertbackslash) {	
-		str = str.replace(/\\([A-Fa-f0-9]{1,6})(\s)?/g, 
+	// convert up to 6 digit escapes to characters
+	str = str.replace(/0x([A-Fa-f0-9]{1,6})/g,
 					function(matchstr, parens) {
 						return hex2char(parens);
 						}
 						);
-	 	str = str.replace(/\\/g, ''); 
+	return str;
+};
+
+exports.convertCSS2Char = function( str, convertbackslash ) {
+	// converts a string containing CSS escapes to a string of characters
+	// str: string, the input
+	// convertbackslash: boolean, true if you want \x etc to become x or \a to be treated as 0xA
+
+	// convert up to 6 digit escapes to characters & throw away any following whitespace
+	if (convertbackslash) {
+		str = str.replace(/\\([A-Fa-f0-9]{1,6})(\s)?/g,
+					function(matchstr, parens) {
+						return hex2char(parens);
+						}
+						);
+	 	str = str.replace(/\\/g, '');
 	 	}
 	else {
-		str = str.replace(/\\([A-Fa-f0-9]{2,6})(\s)?/g, 
+		str = str.replace(/\\([A-Fa-f0-9]{2,6})(\s)?/g,
 					function(matchstr, parens) {
 						return hex2char(parens);
 						}
@@ -225,99 +223,99 @@ exports.convertCSS2Char = function( str, convertbackslash ) {
 };
 
 
-exports.convertjEsc2Char = function( str, shortEscapes ) { 
+exports.convertjEsc2Char = function( str, shortEscapes ) {
 	// converts a string containing JavaScript or Java escapes to a string of characters
 	// str: string, the input
 	// shortEscapes: boolean, if true the exports.will convert \b etc to characters
-	
+
 	// convert \U and 6 digit escapes to characters
-	str = str.replace(/\\U([A-Fa-f0-9]{8})/g, 
+	str = str.replace(/\\U([A-Fa-f0-9]{8})/g,
 					function(matchstr, parens) {
 						return hex2char(parens);
 						}
 						);
 	// convert \u and 6 digit escapes to characters
-	str = str.replace(/\\u([A-Fa-f0-9]{4})/g, 
+	str = str.replace(/\\u([A-Fa-f0-9]{4})/g,
 					function(matchstr, parens) {
 						return hex2char(parens);
 						}
 						);
 	// convert \b etc to characters, if flag set
 	if (shortEscapes) {
-		//str = str.replace(/\\0/g, '\0'); 
-		str = str.replace(/\\b/g, '\b'); 
-		str = str.replace(/\\t/g, '\t'); 
-		str = str.replace(/\\n/g, '\n'); 
-		str = str.replace(/\\v/g, '\v'); 
-		str = str.replace(/\\f/g, '\f'); 
-		str = str.replace(/\\r/g, '\r'); 
-		str = str.replace(/\\\'/g, '\''); 
-		str = str.replace(/\\\"/g, '\"'); 
-		str = str.replace(/\\\\/g, '\\'); 
+		//str = str.replace(/\\0/g, '\0');
+		str = str.replace(/\\b/g, '\b');
+		str = str.replace(/\\t/g, '\t');
+		str = str.replace(/\\n/g, '\n');
+		str = str.replace(/\\v/g, '\v');
+		str = str.replace(/\\f/g, '\f');
+		str = str.replace(/\\r/g, '\r');
+		str = str.replace(/\\\'/g, '\'');
+		str = str.replace(/\\\"/g, '\"');
+		str = str.replace(/\\\\/g, '\\');
 		}
 	return str;
 };
 
 
-exports.convertpEnc2Char = function( str ) { 
+exports.convertpEnc2Char = function( str ) {
 	// converts a string containing precent encoded escapes to a string of characters
 	// str: string, the input
-	
+
 	// find runs of hex numbers separated by % and send them for conversion
-	str = str.replace(/((%[A-Fa-f0-9]{2})+)/g, 
+	str = str.replace(/((%[A-Fa-f0-9]{2})+)/g,
 					function(matchstr, parens) {
-						//return convertpEsc2Char(parens.replace(/%/g,' ')); 
-						return convertpEsc2Char(parens); 
+						//return convertpEsc2Char(parens.replace(/%/g,' '));
+						return convertpEsc2Char(parens);
 						}
-						); 
+						);
 	return str;
 };
 
 
-exports.convertEntities2Char = function( str ) { 
+exports.convertEntities2Char = function( str ) {
 	// converts a string containing HTML/XML character entities to a string of characters
 	// str: string, the input
-	
-	str = str.replace(/&([A-Za-z0-9]+);/g, 
+
+	str = str.replace(/&([A-Za-z0-9]+);/g,
 					function(matchstr, parens) { //alert(parens);
 						if (parens in entities) { //alert(entities[parens]);
 							return entities[parens];
-							} 
+							}
 						else { return matchstr; }						}
 						);
 	return str;
 };
 
 
-exports.convertNumbers2Char = function( str, type ) { 
+exports.convertNumbers2Char = function( str, type ) {
 	// converts a string containing HTML/XML character entities to a string of characters
 	// str: string, the input
 	// type: string enum [none, hex, dec, utf8, utf16], what to treat numbers as
-	
+
 	if (type == 'hex') {
-		str = str.replace(/(\b[A-Fa-f0-9]{1,6}\b)/g, 
+		str = str.replace(/(\b[A-Fa-f0-9]{1,6}\b)/g,
 					function(matchstr, parens) {
 						return hex2char(parens);
 						}
 						);
 		}
 	else if (type == 'dec') {
-		str = str.replace(/(\b[0-9]+\b)/g, 
+		str = str.replace(/(\b[0-9]+\b)/g,
 					function(matchstr, parens) {
 						return dec2char(parens);
 						}
 						);
 		}
 	else if (type == 'utf8') {
-		str = str.replace(/(( [A-Fa-f0-9]{2})+)/g, 
-		//str = str.replace(/((\b[A-Fa-f0-9]{2}\b)+)/g, 
+		str = str.replace(/(( [A-Fa-f0-9]{2})+)/g,
+		//str = str.replace(/((\b[A-Fa-f0-9]{2}\b)+)/g,
 					function(matchstr, parens) {
-						return convertUTF82Char(parens); 
+						return convertUTF82Char(parens);
 						}
 						);
 		}
 	else if (type == 'utf16') {
-		str = str.replace(/(( [A-Fa-f0-9]{1,6})+)/g, 
+		str = str.replace(/(( [A-Fa-f0-9]{1,6})+)/g,
 					function(matchstr, parens) {
 						return convertUTF162Char(parens);
 						}
@@ -337,20 +335,20 @@ exports.convertUTF82Char = function( str ) {
 	var outputString = "";
 	var counter = 0;
 	var n = 0;
-	
+
 	// remove leading and trailing spaces
 	str = str.replace(/^\s+/, '');
 	str = str.replace(/\s+$/,'');
 	if (str.length == 0) { return ""; }
 	str = str.replace(/\s+/g, ' ');
-  
+
 	var listArray = str.split(' ');
 	for ( var i = 0; i < listArray.length; i++ ) {
 		var b = parseInt(listArray[i], 16);  // alert('b:'+dec2hex(b));
 		switch (counter) {
 		case 0:
 			if (0 <= b && b <= 0x7F) {  // 0xxxxxxx
-				outputString += dec2char(b); } 
+				outputString += dec2char(b); }
 			else if (0xC0 <= b && b <= 0xDF) {  // 110xxxxx
 				counter = 1;
 				n = b & 0x1F; }
@@ -386,20 +384,20 @@ exports.convertUTF82Char = function( str ) {
 
 
 
-exports.convertUTF162Char = function( str ) { 
+exports.convertUTF162Char = function( str ) {
 	// Converts a string of UTF-16 code units to characters
 	// str: sequence of UTF16 code units, separated by spaces
 	var highsurrogate = 0;
 	var suppCP;
 	var n = 0;
 	var outputString = '';
-	
+
 	// remove leading and multiple spaces
 	str = str.replace(/^\s+/,'');
 	str = str.replace(/\s+$/,'');
 	if (str.length == 0){ return; }
-	str = str.replace(/\s+/g,' '); 
-	
+	str = str.replace(/\s+/g,' ');
+
 	var listArray = str.split(' ');
 	for (var i = 0; i < listArray.length; i++) {
 		var b = parseInt(listArray[i], 16); //alert(listArray[i]+'='+b);
@@ -436,14 +434,14 @@ exports.convertpEsc2Char = function( str ) {
 	var outputString = "";
 	var counter = 0;
 	var n = 0;
-	
+
 	var listArray = str.split('%');
 	for ( var i = 1; i < listArray.length; i++ ) {
 		var b = parseInt(listArray[i], 16);  // alert('b:'+dec2hex(b));
 		switch (counter) {
 		case 0:
 			if (0 <= b && b <= 0x7F) {  // 0xxxxxxx
-				outputString += dec2char(b); } 
+				outputString += dec2char(b); }
 			else if (0xC0 <= b && b <= 0xDF) {  // 110xxxxx
 				counter = 1;
 				n = b & 0x1F; }
@@ -487,7 +485,7 @@ exports.convertXML2Char = function(str) {
 	str = convertHexNCR2Char(str);
 	str = convertDecNCR2Char(str);
 	str = convertEntities2Char(str);
-	
+
 	return str;
 };
 
@@ -505,7 +503,7 @@ exports.convertCharStr2XML = function( str, convertinvisibles, bidimarkup ) {
 	str = str.replace(/"/g, '&quot;');
 	str = str.replace(/</g, '&lt;');
 	str = str.replace(/>/g, '&gt;');
-	
+
 	// replace invisible and ambiguous characters
 	if (convertinvisibles) {
 		str = str.replace(/\u202A/g, '&#x202A;');
@@ -535,7 +533,7 @@ exports.convertCharStr2XML = function( str, convertinvisibles, bidimarkup ) {
 };
 
 
-exports.convertCharStr2SelectiveCPs = function( str, preserve, pad, before, after, base ) { 
+exports.convertCharStr2SelectiveCPs = function( str, preserve, pad, before, after, base ) {
 	// converts a string of characters to code points or code point based escapes
 	// str: string, the string to convert
 	// preserve: string enum [ascii, latin1], a set of characters to not convert
@@ -543,11 +541,11 @@ exports.convertCharStr2SelectiveCPs = function( str, preserve, pad, before, afte
 	// before: string, any characters to include before a code point (eg. &#x for NCRs)
 	// after: string, any characters to include after (eg. ; for NCRs)
 	// base: string enum [hex, dec], hex or decimal output
-	var haut = 0; 
+	var haut = 0;
 	var n = 0; var cp;
 	var CPstring = '';
 	for (var i = 0; i < str.length; i++) {
-		var b = str.charCodeAt(i); 
+		var b = str.charCodeAt(i);
 		if (b < 0 || b > 0xFFFF) {
 			CPstring += 'Error in convertCharStr2SelectiveCPs: byte out of range ' + dec2hex(b) + '!';
 			}
@@ -557,7 +555,7 @@ exports.convertCharStr2SelectiveCPs = function( str, preserve, pad, before, afte
 					CPstring += before + dec2hex(0x10000 + ((haut - 0xD800) << 10) + (b - 0xDC00)) + after;
 					}
 				else { cp = 0x10000 + ((haut - 0xD800) << 10) + (b - 0xDC00);
-					CPstring += before + cp + after; 
+					CPstring += before + cp + after;
 					}
 				haut = 0;
 				continue;
@@ -577,20 +575,20 @@ exports.convertCharStr2SelectiveCPs = function( str, preserve, pad, before, afte
 			else if (b <= 255 && preserve == 'latin1') { // && b != 0x3E && b != 0x3C &&  b != 0x26) {
 				CPstring += str.charAt(i);
 				}
-			else { 
+			else {
 				if (base == 'hex') {
-					cp = dec2hex(b); 
+					cp = dec2hex(b);
 					if (pad) { while (cp.length < 4) { cp = '0'+cp; } }
 					}
 				else { cp = b; }
-				CPstring += before + cp + after; 
+				CPstring += before + cp + after;
 				}
 			}
 		}
 	return CPstring;
 };
-	
-exports.convertCharStr2Unicode = function( textString, preserve, pad ) { 
+
+exports.convertCharStr2Unicode = function( textString, preserve, pad ) {
 	// converts a string of characters to U+... notation, separated by space
 	// textString: string, the string to convert
 	// preserve: string enum [ascii, latin1], a set of characters to not convert
@@ -599,7 +597,7 @@ exports.convertCharStr2Unicode = function( textString, preserve, pad ) {
 	var n = 0;
 	var CPstring = ''; pad=false;
 	for (var i = 0; i < textString.length; i++) {
-		var b = textString.charCodeAt(i); 
+		var b = textString.charCodeAt(i);
 		if (b < 0 || b > 0xFFFF) {
 			CPstring += 'Error in convertChar2CP: byte out of range ' + dec2hex(b) + '!';
 			}
@@ -624,10 +622,10 @@ exports.convertCharStr2Unicode = function( textString, preserve, pad ) {
 			else if (b <= 255 && preserve == 'latin1') {
 				CPstring += textString.charAt(i)+' ';
 				}
-			else { 
-				cp = dec2hex(b); 
+			else {
+				cp = dec2hex(b);
 				if (pad) { while (cp.length < 4) { cp = '0'+cp; } }
-				CPstring += 'U+' + cp + ' '; 
+				CPstring += 'U+' + cp + ' ';
 				}
 			}
 		}
@@ -667,9 +665,9 @@ exports.convertCharStr2pEsc = function( str ) {
 		else if (n >= 0x30 && n <= 0x39) { outputString += String.fromCharCode(n); } // digits
 		else if (n == 0x2D || n == 0x2E || n == 0x5F || n == 0x7E) { outputString += String.fromCharCode(n); } // - . _ ~
 		else if (n <= 0x7F) { outputString += '%'+dec2hex2(n); }
-		else if (n <= 0x7FF) { outputString += '%'+dec2hex2(0xC0 | ((n>>6) & 0x1F)) + '%' + dec2hex2(0x80 | (n & 0x3F)); } 
-		else if (n <= 0xFFFF) { outputString += '%'+dec2hex2(0xE0 | ((n>>12) & 0x0F)) + '%' + dec2hex2(0x80 | ((n>>6) & 0x3F)) + '%' + dec2hex2(0x80 | (n & 0x3F)); } 
-		else if (n <= 0x10FFFF) {outputString += '%'+dec2hex2(0xF0 | ((n>>18) & 0x07)) + '%' + dec2hex2(0x80 | ((n>>12) & 0x3F)) + '%' + dec2hex2(0x80 | ((n>>6) & 0x3F)) + '%' + dec2hex2(0x80 | (n & 0x3F)); } 
+		else if (n <= 0x7FF) { outputString += '%'+dec2hex2(0xC0 | ((n>>6) & 0x1F)) + '%' + dec2hex2(0x80 | (n & 0x3F)); }
+		else if (n <= 0xFFFF) { outputString += '%'+dec2hex2(0xE0 | ((n>>12) & 0x0F)) + '%' + dec2hex2(0x80 | ((n>>6) & 0x3F)) + '%' + dec2hex2(0x80 | (n & 0x3F)); }
+		else if (n <= 0x10FFFF) {outputString += '%'+dec2hex2(0xF0 | ((n>>18) & 0x07)) + '%' + dec2hex2(0x80 | ((n>>12) & 0x3F)) + '%' + dec2hex2(0x80 | ((n>>6) & 0x3F)) + '%' + dec2hex2(0x80 | (n & 0x3F)); }
 		else { outputString += '!Error ' + dec2hex(n) +'!'; }
 		}
 	return( outputString );
@@ -677,7 +675,7 @@ exports.convertCharStr2pEsc = function( str ) {
 
 
 
-exports.convertCharStr2UTF8 = function( str ) { 
+exports.convertCharStr2UTF8 = function( str ) {
 	// Converts a string of characters to UTF-8 byte codes, separated by spaces
 	// str: sequence of Unicode characters
 	var highsurrogate = 0;
@@ -685,13 +683,13 @@ exports.convertCharStr2UTF8 = function( str ) {
 	var n = 0;
 	var outputString = '';
 	for (var i = 0; i < str.length; i++) {
-		var cc = str.charCodeAt(i); 
+		var cc = str.charCodeAt(i);
 		if (cc < 0 || cc > 0xFFFF) {
 			outputString += '!Error in convertCharStr2UTF16: unexpected charCodeAt result, cc=' + cc + '!';
 			}
-		if (highsurrogate != 0) {  
+		if (highsurrogate != 0) {
 			if (0xDC00 <= cc && cc <= 0xDFFF) {
-				suppCP = 0x10000 + ((highsurrogate - 0xD800) << 10) + (cc - 0xDC00); 
+				suppCP = 0x10000 + ((highsurrogate - 0xD800) << 10) + (cc - 0xDC00);
 				outputString += ' '+dec2hex2(0xF0 | ((suppCP>>18) & 0x07)) + ' ' + dec2hex2(0x80 | ((suppCP>>12) & 0x3F)) + ' ' + dec2hex2(0x80 | ((suppCP>>6) & 0x3F)) + ' ' + dec2hex2(0x80 | (suppCP & 0x3F));
 				highsurrogate = 0;
 				continue;
@@ -706,8 +704,8 @@ exports.convertCharStr2UTF8 = function( str ) {
 			}
 		else {
 			if (cc <= 0x7F) { outputString += ' '+dec2hex2(cc); }
-			else if (cc <= 0x7FF) { outputString += ' '+dec2hex2(0xC0 | ((cc>>6) & 0x1F)) + ' ' + dec2hex2(0x80 | (cc & 0x3F)); } 
-			else if (cc <= 0xFFFF) { outputString += ' '+dec2hex2(0xE0 | ((cc>>12) & 0x0F)) + ' ' + dec2hex2(0x80 | ((cc>>6) & 0x3F)) + ' ' + dec2hex2(0x80 | (cc & 0x3F)); } 
+			else if (cc <= 0x7FF) { outputString += ' '+dec2hex2(0xC0 | ((cc>>6) & 0x1F)) + ' ' + dec2hex2(0x80 | (cc & 0x3F)); }
+			else if (cc <= 0xFFFF) { outputString += ' '+dec2hex2(0xE0 | ((cc>>12) & 0x0F)) + ' ' + dec2hex2(0x80 | ((cc>>6) & 0x3F)) + ' ' + dec2hex2(0x80 | (cc & 0x3F)); }
 			}
 		}
 	return outputString.substring(1);
@@ -715,7 +713,7 @@ exports.convertCharStr2UTF8 = function( str ) {
 
 
 
-exports.convertCharStr2UTF16 = function( str ) { 
+exports.convertCharStr2UTF16 = function( str ) {
 	// Converts a string of characters to UTF-16 code units, separated by spaces
 	// str: sequence of Unicode characters
 	var highsurrogate = 0;
@@ -723,13 +721,13 @@ exports.convertCharStr2UTF16 = function( str ) {
 	var n = 0;
 	var outputString = '';
 	for (var i = 0; i < str.length; i++) {
-		var cc = str.charCodeAt(i); 
+		var cc = str.charCodeAt(i);
 		if (cc < 0 || cc > 0xFFFF) {
 			outputString += '!Error in convertCharStr2UTF16: unexpected charCodeAt result, cc=' + cc + '!';
 			}
 		if (highsurrogate != 0) {
 			if (0xDC00 <= cc && cc <= 0xDFFF) {
-				suppCP = 0x10000 + ((highsurrogate - 0xD800) << 10) + (cc - 0xDC00); 
+				suppCP = 0x10000 + ((highsurrogate - 0xD800) << 10) + (cc - 0xDC00);
 				suppCP -= 0x10000; outputString += dec2hex4(0xD800 | (suppCP >> 10)) + ' ' + dec2hex4(0xDC00 | (suppCP & 0x3FF)) + ' ';
 				highsurrogate = 0;
 				continue;
@@ -751,7 +749,7 @@ exports.convertCharStr2UTF16 = function( str ) {
 
 
 
-exports.convertCharStr2jEsc = function( str, cstyle ) { 
+exports.convertCharStr2jEsc = function( str, cstyle ) {
 	// Converts a string of characters to JavaScript escapes
 	// str: sequence of Unicode characters
 	var highsurrogate = 0;
@@ -760,20 +758,20 @@ exports.convertCharStr2jEsc = function( str, cstyle ) {
 	var n = 0;
 	var outputString = '';
 	for (var i = 0; i < str.length; i++) {
-		var cc = str.charCodeAt(i); 
+		var cc = str.charCodeAt(i);
 		if (cc < 0 || cc > 0xFFFF) {
 			outputString += '!Error in convertCharStr2UTF16: unexpected charCodeAt result, cc=' + cc + '!';
 			}
 		if (highsurrogate != 0) { // this is a supp char, and cc contains the low surrogate
 			if (0xDC00 <= cc && cc <= 0xDFFF) {
-				suppCP = 0x10000 + ((highsurrogate - 0xD800) << 10) + (cc - 0xDC00); 
+				suppCP = 0x10000 + ((highsurrogate - 0xD800) << 10) + (cc - 0xDC00);
 				if (cstyle) {
 					pad = suppCP.toString(16);
 					while (pad.length < 8) { pad = '0'+pad; }
-					outputString += '\\U'+pad; 
+					outputString += '\\U'+pad;
 					}
 				else {
-					suppCP -= 0x10000; 
+					suppCP -= 0x10000;
 					outputString += '\\u'+ dec2hex4(0xD800 | (suppCP >> 10)) +'\\u'+ dec2hex4(0xDC00 | (suppCP & 0x3FF));
 					}
 				highsurrogate = 0;
@@ -800,12 +798,12 @@ exports.convertCharStr2jEsc = function( str, cstyle ) {
 				case 34: outputString += '\\\"'; break;
 				case 39: outputString += '\\\''; break;
 				case 92: outputString += '\\\\'; break;
-				default: 
+				default:
 					if (cc > 0x1f && cc < 0x7F) { outputString += String.fromCharCode(cc); }
-					else { 
+					else {
 						pad = cc.toString(16).toUpperCase();
 						while (pad.length < 4) { pad = '0'+pad; }
-						outputString += '\\u'+pad; 
+						outputString += '\\u'+pad;
 						}
 				}
 			}
@@ -815,7 +813,7 @@ exports.convertCharStr2jEsc = function( str, cstyle ) {
 
 
 
-exports.convertCharStr2CSS = function( str ) { 
+exports.convertCharStr2CSS = function( str ) {
 	// Converts a string of characters to CSS escapes
 	// str: sequence of Unicode characters
 	var highsurrogate = 0;
@@ -823,17 +821,17 @@ exports.convertCharStr2CSS = function( str ) {
 	var pad;
 	var outputString = '';
 	for (var i = 0; i < str.length; i++) {
-		var cc = str.charCodeAt(i); 
+		var cc = str.charCodeAt(i);
 		if (cc < 0 || cc > 0xFFFF) {
 			outputString += '!Error in convertCharStr2CSS: unexpected charCodeAt result, cc=' + cc + '!';
 			}
 		if (highsurrogate != 0) { // this is a supp char, and cc contains the low surrogate
 			if (0xDC00 <= cc && cc <= 0xDFFF) {
-				suppCP = 0x10000 + ((highsurrogate - 0xD800) << 10) + (cc - 0xDC00); 
+				suppCP = 0x10000 + ((highsurrogate - 0xD800) << 10) + (cc - 0xDC00);
 				pad = suppCP.toString(16).toUpperCase();
 				if (suppCP < 0x10000) { while (pad.length < 4) { pad = '0'+pad; } }
 				else { while (pad.length < 6) { pad = '0'+pad; } }
-				outputString += '\\'+pad+' '; 
+				outputString += '\\'+pad+' ';
 				highsurrogate = 0;
 				continue;
 				}
@@ -849,10 +847,10 @@ exports.convertCharStr2CSS = function( str ) {
 			if (cc == 0x5C) { outputString += '\\\\'; }
 			else if (cc > 0x1f && cc < 0x7F) { outputString += String.fromCharCode(cc); }
 			else if (cc == 0x9 || cc == 0xA || cc == 0xD) { outputString += String.fromCharCode(cc); }
-			else /* if (cc > 0x7E) */ { 
+			else /* if (cc > 0x7E) */ {
 				pad = cc.toString(16).toUpperCase();
 				while (pad.length < 4) { pad = '0'+pad; }
-				outputString += '\\'+pad+' '; 
+				outputString += '\\'+pad+' ';
 				}
 			}
 		}
@@ -861,7 +859,7 @@ exports.convertCharStr2CSS = function( str ) {
 
 
 
-exports.convertCharStr2CP = function( textString, preserve, pad, type ) { 
+exports.convertCharStr2CP = function( textString, preserve, pad, type ) {
 	// converts a string of characters to code points, separated by space
 	// textString: string, the string to convert
 	// preserve: string enum [ascii, latin1], a set of characters to not convert
@@ -872,7 +870,7 @@ exports.convertCharStr2CP = function( textString, preserve, pad, type ) {
 	var CPstring = '';
 	var afterEscape = false;
 	for (var i = 0; i < textString.length; i++) {
-		var b = textString.charCodeAt(i); 
+		var b = textString.charCodeAt(i);
 		if (b < 0 || b > 0xFFFF) {
 			CPstring += 'Error in convertChar2CP: byte out of range ' + dec2hex(b) + '!';
 			}
@@ -880,17 +878,17 @@ exports.convertCharStr2CP = function( textString, preserve, pad, type ) {
 			if (0xDC00 <= b && b <= 0xDFFF) { //alert('12345'.slice(-1).match(/[A-Fa-f0-9]/)+'<');
 				//if (CPstring.slice(-1).match(/[A-Za-z0-9]/) != null) { CPstring += ' '; }
 				if (afterEscape) { CPstring += ' '; }
-				if (type == 'hex') { 
-					CPstring += dec2hex(0x10000 + ((haut - 0xD800) << 10) + (b - 0xDC00)); 
+				if (type == 'hex') {
+					CPstring += dec2hex(0x10000 + ((haut - 0xD800) << 10) + (b - 0xDC00));
 					}
-				else if (type == 'unicode') { 
-					CPstring += 'U+'+dec2hex(0x10000 + ((haut - 0xD800) << 10) + (b - 0xDC00)); 
+				else if (type == 'unicode') {
+					CPstring += 'U+'+dec2hex(0x10000 + ((haut - 0xD800) << 10) + (b - 0xDC00));
 					}
-				else if (type == 'zerox') { 
-					CPstring += '0x'+dec2hex(0x10000 + ((haut - 0xD800) << 10) + (b - 0xDC00)); 
+				else if (type == 'zerox') {
+					CPstring += '0x'+dec2hex(0x10000 + ((haut - 0xD800) << 10) + (b - 0xDC00));
 					}
-				else { 
-					CPstring += 0x10000 + ((haut - 0xD800) << 10) + (b - 0xDC00); 
+				else {
+					CPstring += 0x10000 + ((haut - 0xD800) << 10) + (b - 0xDC00);
 					}
 				haut = 0;
 				continue;
@@ -913,27 +911,27 @@ exports.convertCharStr2CP = function( textString, preserve, pad, type ) {
 				CPstring += textString.charAt(i);
 				afterEscape = false;
 				}
-			else { 
+			else {
 				//if (CPstring.slice(-1).match(/[A-Za-z0-9]/) != null) { CPstring += ' '; }
 				if (afterEscape) { CPstring += ' '; }
-				if (type == 'hex') { 
-					cp = dec2hex(b); 
+				if (type == 'hex') {
+					cp = dec2hex(b);
 					if (pad) { while (cp.length < 4) { cp = '0'+cp; } }
 					}
-				else if (type == 'unicode') { 
-					cp = dec2hex(b); 
+				else if (type == 'unicode') {
+					cp = dec2hex(b);
 					if (pad) { while (cp.length < 4) { cp = '0'+cp; } }
-					CPstring += 'U+'; 
+					CPstring += 'U+';
 					}
-				else if (type == 'zerox') { 
-					cp = dec2hex(b); 
+				else if (type == 'zerox') {
+					cp = dec2hex(b);
 					if (pad) { while (cp.length < 4) { cp = '0'+cp; } }
-					CPstring += '0x'; 
+					CPstring += '0x';
 					}
-				else { 
+				else {
 					cp = b;
 					}
-				CPstring += cp; 
+				CPstring += cp;
 				afterEscape = true;
 				}
 			}
@@ -941,8 +939,8 @@ exports.convertCharStr2CP = function( textString, preserve, pad, type ) {
 	//return CPstring.substring(0, CPstring.length-1);
 	return CPstring;
 };
-	
-	
+
+
 exports.convertCharStr2Unicode = function ( textString, preserve, pad ) { alert('here');
 	// converts a string of characters to U+... notation, separated by space
 	// textString: string, the string to convert
@@ -952,7 +950,7 @@ exports.convertCharStr2Unicode = function ( textString, preserve, pad ) { alert(
 	var n = 0;
 	var CPstring = ''; pad=false;
 	for (var i = 0; i < textString.length; i++) {
-		var b = textString.charCodeAt(i); 
+		var b = textString.charCodeAt(i);
 		if (b < 0 || b > 0xFFFF) {
 			CPstring += 'Error in convertChar2CP: byte out of range ' + dec2hex(b) + '!';
 			}
@@ -977,16 +975,16 @@ exports.convertCharStr2Unicode = function ( textString, preserve, pad ) { alert(
 			else if (b <= 255 && preserve == 'latin1') {
 				CPstring += textString.charAt(i)+' ';
 				}
-			else { 
-				cp = dec2hex(b); 
+			else {
+				cp = dec2hex(b);
 				if (pad) { while (cp.length < 4) { cp = '0'+cp; } }
-				CPstring += 'U+' + cp + ' '; 
+				CPstring += 'U+' + cp + ' ';
 				}
 			}
 		}
 	return CPstring.substring(0, CPstring.length-1);
 };
-	
-	
 
-
+
+
+

@@ -1,9 +1,8 @@
 {
-    "notify":               false,
-    "apiToken":             "",
-    "releaseNotes":         "",
-    "appFileDir":           "./dist/",
-    "appFile":              "xx.ipa",
-    "provisioningUUID":     "",
-    "distCertificateName":  "die.interaktiven GmbH & Co. KG (42HNMCMK48)"
+  "endpoint": "https://www.installrapp.com/apps.json",
+  "notify": false,
+  "apiToken": "PUT_HERE_YOUR_INSTALLR_API_TOKEN",
+  "appFileDir": "./dist/",
+  "appTokenIOS": "",
+  "appTokenAndroid": ""
 }
